@@ -1,0 +1,10 @@
+body { margin: 0; padding: 0; }
+html, body, #map { height: 100%; }
+
+.airplane-icon {
+    width: 58px;
+    height: 50px;
+    background: url('https://raw.githubusercontent.com/owennewo-dev/GeoFS-cockpit-realism/main/aircraft-icons.png') no-repeat;
+    background-position: -511px -86px;
+    background-size: auto;
+}
