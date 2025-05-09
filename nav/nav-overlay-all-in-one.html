@@ -70,14 +70,15 @@
     function updateAirplanePosition() {
         if (geofs.aircraft && geofs.aircraft.instance) {
            const position = geofs.aircraft.instance.llaLocation;
+
             airplaneMarker.setLngLat([position[1], position[0]]);
-        
             map.setCenter([position[1], position[0]]);
     }
 }
 
-
+setTimeout(() => {
     setInterval(updateAirplanePosition, 1000);
+}, 5000);
 
 </script>
 </body>
