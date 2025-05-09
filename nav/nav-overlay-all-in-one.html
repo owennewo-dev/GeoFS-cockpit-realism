@@ -77,17 +77,18 @@
         }
     }
 
-    function waitForAircraft() {
-        if (geofs.aircraft && geofs.aircraft.instance) {
-            console.log("GeoFS Aircraft Loaded! Starting updates...");
-            setInterval(updateAirplanePosition, 1000);
-        } else {
-            console.log("Waiting for aircraft data...");
-            setTimeout(waitForAircraft, 2000);
-        }
+    function updateMapTexture() {
+        const textureData = canvas.toDataURL("image/png");
+        geofs.aircraft.instance.addParts({
+            name: "NavMap",
+            url: textureData,
+            position: [0.5, -0.3, 1.2],
+            scale: 1,
+            rotation: [0, 0, 0]
+        });
     }
 
-setTimeout(waitForAircraft, 5000);
+setInterval(updateMapTexture, 1000);
 
 
 </script>
