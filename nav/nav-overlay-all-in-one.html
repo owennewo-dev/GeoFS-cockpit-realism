@@ -73,12 +73,19 @@
 
             airplaneMarker.setLngLat([position[1], position[0]]);
             map.setCenter([position[1], position[0]]);
+        }
     }
-}
+    function waitForAircraft() {
+        if (geofs.aircraft && geofs.aircraft.instance) {
+            console.log("GeoFS Aircraft Loaded! Starting updates...");
+            setInterval(updateAirplanePosition, 1000); // Start updating once aircraft data exists
+        } else {
+            console.log("Waiting for aircraft data...");
+            setTimeout(waitForAircraft, 2000); // Keep checking every 2 seconds
+        }
+    }
 
-setTimeout(() => {
-    setInterval(updateAirplanePosition, 1000);
-}, 5000);
+    setTimeout(waitForAircraft, 5000);
 
 </script>
 </body>
