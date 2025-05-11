@@ -134,7 +134,7 @@ function addAirplaneIconOverlay(spriteX, spriteY) {
     icon.style.width = "58px";
     icon.style.height = "50px";
     icon.style.background = "url('https://owennewo-dev.github.io/GeoFS-cockpit-realism/aircraft-icons.png') no-repeat";
-    icon.style.backgroundSize = "792px 576px";
+    icon.style.backgroundSize = "576px 792px";
     icon.style.backgroundPosition = `${-spriteX}px ${-spriteY}px`;
     icon.style.backgroundRepeat = "no-repeat";
     icon.style.pointerEvents = "none";
