@@ -78,6 +78,12 @@ function addRangeButton() {
     }]);
 }
 
+function trackZoomOutButton() {
+    if (controls.mouse.clickedNode == "zoomOutButton") {
+         map.setZoom(map.getZoom() - 1)
+    }
+}
+
 function showMap() {
     map.jumpTo({
         center: [geofs.aircraft.instance.llaLocation[1], geofs.aircraft.instance.llaLocation[0]],
@@ -174,3 +180,4 @@ function appendNewChild(parent, tagName, attributes = {}, pos = -1) {
 initMap();
 addMapDisplay();
 addRangeButton();
+trackZoomOutButton();
