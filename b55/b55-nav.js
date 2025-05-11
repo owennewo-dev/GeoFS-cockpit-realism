@@ -39,7 +39,7 @@ function initMap() {
             ],
         },
         center: [-74.5, 40],
-        zoom: 2,
+        zoom: 10,
         maxPitch: 90
     });
 }
@@ -66,10 +66,21 @@ function addMapDisplay() {
     mapCallback = geofs.api.addFrameCallback(showMap);
 }
 
+function addRangeButton() {
+    geofs.aircraft.instance.addParts([{
+        "name": "zoomOutButton",
+        "type": "none",
+        "parent": "cockpit",
+        "model": "https://owennewo-dev.github.io/GeoFS-cockpit-realism/b55/gns-530-range-button.glb",
+        "position": [0.295, 0.625, 0.398],
+        "scale": [1, 1, 1],
+        "rotation": [0, -270, 180]
+    }]);
+}
+
 function showMap() {
     map.jumpTo({
         center: [geofs.aircraft.instance.llaLocation[1], geofs.aircraft.instance.llaLocation[0]],
-        zoom: 10,
         bearing: geofs.animation.values.heading360
     })
     geofs.aircraft.instance.parts["map"].object3d.model.setTextureFromCanvas(map.painter.context.gl, 0)
@@ -118,33 +129,6 @@ function loadFlightplan(waypointArray) {
     });
 }
 
-function addAirplaneIconOverlay(spriteX, spriteY) {
-    const mapContainer = document.getElementById("MapDisplay");
-
-    if (!mapContainer) {
-        console.error("Map display container not found!");
-        return;
-    }
-
-    const icon = document.createElement("div");
-    icon.style.position = "absolute";
-    icon.style.top = "50%";
-    icon.style.left = "50%";
-    icon.style.transform = "translate(-50%, -50%)";
-    icon.style.width = "58px";
-    icon.style.height = "50px";
-    icon.style.background = "url('https://owennewo-dev.github.io/GeoFS-cockpit-realism/aircraft-icons.png') no-repeat";
-    icon.style.backgroundSize = "576px 792px";
-    icon.style.backgroundPosition = `${-spriteX}px ${-spriteY}px`;
-    icon.style.backgroundRepeat = "no-repeat";
-    icon.style.pointerEvents = "none";
-
-    mapContainer.appendChild(icon);
-}
-
-addAirplaneIconOverlay(511, 86);
-
-
 //this is from LiverySelector
 
 /**
@@ -188,4 +172,5 @@ function appendNewChild(parent, tagName, attributes = {}, pos = -1) {
 
 
 initMap();
-addMapDisplay()
+addMapDisplay();
+addRangeButton();
