@@ -15,7 +15,7 @@ function initMap() {
             'sources': {
                 'osm': {
                     'type': 'raster',
-                    'tiles': ['https://{s}.basemaps.cartocdn.com/{style}/{z}/{x}/{y}{scale}.png'],
+                    'tiles': ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
                     'tileSize': 256,
                     'attribution': '<a href="https://openstreetmap.org/" target="_blank">OpenStreetMap</a>'
                 },
