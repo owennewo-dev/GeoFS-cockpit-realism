@@ -66,22 +66,14 @@ function addMapDisplay() {
     mapCallback = geofs.api.addFrameCallback(showMap);
 }
 
-function addRangeButton() {
-    geofs.aircraft.instance.addParts([{
-        "name": "zoomOutButton",
-        "type": "none",
-        "parent": "cockpit",
-        "model": "https://owennewo-dev.github.io/GeoFS-cockpit-realism/b55/gns-530-range-button.glb",
-        "position": [0.295, 0.625, 0.398],
-        "scale": [1, 1, 1],
-        "rotation": [0, -270, 180]
-    }]);
-}
-
-function trackZoomOutButton() {
-    if (controls.mouse.clickedNode == "zoomOutButton") {
-         map.setZoom(map.getZoom() - 1)
-    }
+function trackZoomKeys() {
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "-") { 
+            map.setZoom(map.getZoom() - 1);
+        } else if (event.key === "=") { 
+            map.setZoom(map.getZoom() + 1);
+        }
+    });
 }
 
 function showMap() {
@@ -179,5 +171,4 @@ function appendNewChild(parent, tagName, attributes = {}, pos = -1) {
 
 initMap();
 addMapDisplay();
-addRangeButton();
-trackZoomOutButton();
+trackZoomKeys();

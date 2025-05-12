@@ -39,7 +39,7 @@ function initMap() {
             ],
         },
         center: [-74.5, 40],
-        zoom: 2,
+        zoom: 10,
         maxPitch: 90
     });
 }
@@ -58,7 +58,7 @@ function addMapDisplay() {
         "parent": "cockpit",
         "model": "https://owennewo-dev.github.io/GeoFS-cockpit-realism/b55/garmin-gns-530.glb",
         "position": [0.22, 0.6275, 0.358],
-        "scale": [2.1, 1.2, 1.2],
+        "scale": [1.2, 1.2, 1.2],
         "rotation": [0, 270, 90]
     }]);
     
@@ -66,10 +66,27 @@ function addMapDisplay() {
     mapCallback = geofs.api.addFrameCallback(showMap);
 }
 
+function addRangeButton() {
+    geofs.aircraft.instance.addParts([{
+        "name": "zoomOutButton",
+        "type": "none",
+        "parent": "cockpit",
+        "model": "https://owennewo-dev.github.io/GeoFS-cockpit-realism/b55/gns-530-range-button.glb",
+        "position": [0.295, 0.625, 0.398],
+        "scale": [1, 1, 1],
+        "rotation": [0, -270, 180]
+    }]);
+}
+
+function trackZoomOutButton() {
+    if (controls.mouse.clickedNode == "zoomOutButton") {
+         map.setZoom(map.getZoom() - 1)
+    }
+}
+
 function showMap() {
     map.jumpTo({
         center: [geofs.aircraft.instance.llaLocation[1], geofs.aircraft.instance.llaLocation[0]],
-        zoom: 2,
         bearing: geofs.animation.values.heading360
     })
     geofs.aircraft.instance.parts["map"].object3d.model.setTextureFromCanvas(map.painter.context.gl, 0)
@@ -118,7 +135,6 @@ function loadFlightplan(waypointArray) {
     });
 }
 
-
 //this is from LiverySelector
 
 /**
@@ -160,43 +176,8 @@ function appendNewChild(parent, tagName, attributes = {}, pos = -1) {
     return child;
 }
 
-function addAircraftIcon() {
-    map.loadImage("https://owennewo-dev.github.io/GeoFS-cockpit-realism/aircraft-icons.png", function(error, image) {
-        if (error) {
-            console.error("Error loading aircraft icon image:", error);
-            return;
-        }
-
-        console.log("Aircraft icon image loaded successfully!");
-        map.addImage("aircraft-icon", image, { pixelRatio: 1 });
-
-        // Place icon at a fixed location (Chicago, IL)
-        map.addSource("aircraft", {
-            "type": "geojson",
-            "data": {
-                "type": "Feature",
-                "properties": { "heading": 0 }, // Static heading for testing
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [-87.6298, 41.8781] // Fixed Chicago coordinates
-                }
-            }
-        });
-
-        map.addLayer({
-            "id": "aircraft",
-            "type": "symbol",
-            "source": "aircraft",
-            "layout": {
-                "icon-image": "aircraft-icon",
-                "icon-size": 1
-            }
-        });
-
-        console.log("Aircraft icon placed over Chicago!");
-    });
-}
 
 initMap();
 addMapDisplay();
-addAircraftIcon();
+addRangeButton();
+trackZoomOutButton();
