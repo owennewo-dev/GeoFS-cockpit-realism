@@ -11,7 +11,7 @@ function initMap() {
         style: {
             'version': 8,
             'minzoom': 2,
-            'maxzoom': 20,
+            'maxzoom': 16,
             'sources': {
                 'osm': {
                     'type': 'raster',
@@ -30,12 +30,19 @@ function initMap() {
                     'tiles': ['https://api.tiles.openaip.net/api/data/openaip/{z}/{x}/{y}.png?apiKey=7966bc2e7fc3f108e9c7428b661bf2e1'],
                     'tileSize': 256,
                     'attribution': '<a href="https://www.openaip.net" target="_blank">OpenAIP</a>'
+                },
+                'vfr': {
+                    'type': 'raster',
+                    'tiles': ['https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer/tile/{z}/{y}/{x}.png'],
+                    'tileSize': 256,
+                    'attribution': '<a href="https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer" target="_blank">FAA</a>'
                 }
             },
             'layers': [
                 {'id': 'hills', 'type': 'hillshade', 'source': 'hillshadeSource', 'minzoom': 0, 'maxzoom': 20},
                 {'id': 'osm', 'type': 'raster', 'source': 'osm', 'minzoom': 0, 'maxzoom': 20, 'paint': {'raster-opacity': 0.4}},
-                {'id': 'openaip', 'type': 'raster', 'source': 'openaip', 'minzoom': 0, 'maxzoom': 20}
+                {'id': 'openaip', 'type': 'raster', 'source': 'openaip', 'minzoom': 0, 'maxzoom': 20},
+                {'id': 'vfr', 'type': 'raster', 'source': 'vfr', 'minzoom': 0, 'maxzoom': 20}
             ],
         },
         center: [-74.5, 40],
@@ -76,6 +83,28 @@ function trackZoomKeys() {
     });
 }
 
+function trackLayerSwitch() {
+    let mode = 1;
+
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "Backspace") {
+            if (mode === 1) {
+                map.setLayoutProperty("osm", "visibility", "none");
+                map.setLayoutProperty("hills", "visibility", "none");
+                map.setLayoutProperty("openaip", "visibility", "none");
+                map.setLayoutProperty("vfr", "visibility", "visible");
+                mode = 2;
+            } else {
+                map.setLayoutProperty("osm", "visibility", "visible");
+                map.setLayoutProperty("hills", "visibility", "visible");
+                map.setLayoutProperty("openaip", "visibility", "visible");
+                map.setLayoutProperty("vfr", "visibility", "none");
+                mode = 1;
+            }
+        }
+    });
+}
+
 function showMap() {
     map.jumpTo({
         center: [geofs.aircraft.instance.llaLocation[1], geofs.aircraft.instance.llaLocation[0]],
@@ -88,19 +117,30 @@ function destroy() {
     geofs.api.removeFrameCallback(mapCallback);
 }
 
-
 function loadFlightplan(waypointArray) {
-    if (!waypointArray) {
-        waypointArray = geofs.flightPlan.waypointArray;
+    if (!map) {
+        console.error("Map instance is not initialized!");
+        return;
     }
+
+    waypointArray = geofs.flightPlan.waypointArray;
+
+    if (!waypointArray || waypointArray.length === 0) {
+        console.error("No waypoints found!");
+        return;
+    }
+
+    console.log("Reloading flight plan...");
+
     if (map.getSource('route')) {
         map.removeLayer('route');
         map.removeSource('route');
     }
-    let waypoints = [];
-    waypointArray.forEach(wp => {
-        waypoints.push([wp.lon, wp.lat]);
-    });
+
+    let waypoints = waypointArray.map(wp => [wp.lon, wp.lat]);
+
+    console.log("Updating map with waypoints:", waypoints);
+
     map.addSource('route', {
         'type': 'geojson',
         'data': {
@@ -112,6 +152,7 @@ function loadFlightplan(waypointArray) {
             }
         }
     });
+
     map.addLayer({
         'id': 'route',
         'type': 'line',
@@ -122,10 +163,15 @@ function loadFlightplan(waypointArray) {
         },
         'paint': {
             'line-color': '#b100b1',
-            'line-width': 10
+            'line-width': 5
         }
     });
+
+    map.jumpTo({ center: waypoints[0] });
 }
+
+document.getElementById("centerMap").parentElement.style.display = "none";
+document.getElementById("drawFlightPath").parentElement.style.display = "none";
 
 //this is from LiverySelector
 
@@ -170,5 +216,12 @@ function appendNewChild(parent, tagName, attributes = {}, pos = -1) {
 
 
 initMap();
+loadFlightplan();
 addMapDisplay();
 trackZoomKeys();
+trackLayerSwitch();
+
+setInterval(function() {
+    console.log("Refreshing flight plan...");
+    loadFlightplan();
+}, 5000);

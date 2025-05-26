@@ -57,8 +57,8 @@ function addMapDisplay() {
         "type": "none",
         "parent": "cockpit",
         "model": "https://owennewo-dev.github.io/GeoFS-cockpit-realism/a350/a350-mfd.glb",
-        "position": [0.22, 0.6275, 0.358],
-        "scale": [1.2, 1.2, 1.2],
+        "position": [0, 0, 0],
+        "scale": [1, 1, 1],
         "rotation": [0, 270, 90]
     }]);
     
