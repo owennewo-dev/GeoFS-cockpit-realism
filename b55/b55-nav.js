@@ -30,19 +30,12 @@ function initMap() {
                     'tiles': ['https://api.tiles.openaip.net/api/data/openaip/{z}/{x}/{y}.png?apiKey=7966bc2e7fc3f108e9c7428b661bf2e1'],
                     'tileSize': 256,
                     'attribution': '<a href="https://www.openaip.net" target="_blank">OpenAIP</a>'
-                },
-                'vfr': {
-                    'type': 'raster',
-                    'tiles': ['https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer/tile/{z}/{y}/{x}.png'],
-                    'tileSize': 256,
-                    'attribution': '<a href="https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer" target="_blank">FAA</a>'
                 }
             },
             'layers': [
                 {'id': 'hills', 'type': 'hillshade', 'source': 'hillshadeSource', 'minzoom': 0, 'maxzoom': 20},
                 {'id': 'osm', 'type': 'raster', 'source': 'osm', 'minzoom': 0, 'maxzoom': 20, 'paint': {'raster-opacity': 0.4}},
-                {'id': 'openaip', 'type': 'raster', 'source': 'openaip', 'minzoom': 0, 'maxzoom': 20},
-                {'id': 'vfr', 'type': 'raster', 'source': 'vfr', 'minzoom': 0, 'maxzoom': 20}
+                {'id': 'openaip', 'type': 'raster', 'source': 'openaip', 'minzoom': 0, 'maxzoom': 20}
             ],
         },
         center: [-74.5, 40],
@@ -79,28 +72,6 @@ function trackZoomKeys() {
             map.setZoom(map.getZoom() - 1);
         } else if (event.key === "=") { 
             map.setZoom(map.getZoom() + 1);
-        }
-    });
-}
-
-function trackLayerSwitch() {
-    let mode = 1;
-
-    document.addEventListener("keydown", function(event) {
-        if (event.key === "Backspace") {
-            if (mode === 1) {
-                map.setLayoutProperty("osm", "visibility", "none");
-                map.setLayoutProperty("hills", "visibility", "none");
-                map.setLayoutProperty("openaip", "visibility", "none");
-                map.setLayoutProperty("vfr", "visibility", "visible");
-                mode = 2;
-            } else {
-                map.setLayoutProperty("osm", "visibility", "visible");
-                map.setLayoutProperty("hills", "visibility", "visible");
-                map.setLayoutProperty("openaip", "visibility", "visible");
-                map.setLayoutProperty("vfr", "visibility", "none");
-                mode = 1;
-            }
         }
     });
 }
@@ -218,8 +189,7 @@ function appendNewChild(parent, tagName, attributes = {}, pos = -1) {
 initMap();
 loadFlightplan();
 addMapDisplay();
-trackZoomKeys();
-trackLayerSwitch();
+trackZoomKeys()
 
 setInterval(function() {
     console.log("Refreshing flight plan...");
