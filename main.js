@@ -1,6 +1,8 @@
 (function() {
     'use strict';
 
+    window.openAIPKey = "YOUR_OPENAIP_API_KEY";
+
     function loadScript(url, callback) {
         const script = document.createElement('script');
         script.src = url;

@@ -27,7 +27,7 @@ function initMap() {
                 },
                 'openaip': {
                     'type': 'raster',
-                    'tiles': ['https://api.tiles.openaip.net/api/data/openaip/{z}/{x}/{y}.png?apiKey=7966bc2e7fc3f108e9c7428b661bf2e1'],
+                    'tiles': ['https://api.tiles.openaip.net/api/data/openaip/{z}/{x}/{y}.png?apiKey=${window.openAIPKey}'],
                     'tileSize': 256,
                     'attribution': '<a href="https://www.openaip.net" target="_blank">OpenAIP</a>'
                 }
