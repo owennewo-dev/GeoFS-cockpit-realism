@@ -185,13 +185,27 @@ function appendNewChild(parent, tagName, attributes = {}, pos = -1) {
     return child;
 }
 
+function runIfCockpitAndB55() {
+    if (geofs.camera.currentModeName === "cockpit" && geofs.aircraftList[geofs.aircraft.instance.id]?.name === "Beechcraft Baron B55") {
+        console.log("Cockpit view, B55");
+        
+        initMap();
+        loadFlightplan();
+        addMapDisplay();
+        trackZoomKeys();
+        
+        setInterval(function() {
+            console.log("Refreshing flight plan...");
+            loadFlightplan();
+        }, 5000);
+    } else {
+        console.log("Not in cockpit view or wrong aircraft");
+    }
+}
 
-initMap();
-loadFlightplan();
-addMapDisplay();
-trackZoomKeys()
-
-setInterval(function() {
-    console.log("Refreshing flight plan...");
-    loadFlightplan();
-}, 5000);
+const checkGeoFSReady = setInterval(() => {
+    if (typeof geofs !== "undefined" && geofs.aircraft && geofs.aircraft.instance) {
+        clearInterval(checkGeoFSReady);
+        runIfCockpitAndB55();
+    }
+}, 1000);
