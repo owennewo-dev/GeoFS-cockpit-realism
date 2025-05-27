@@ -23,6 +23,7 @@
 
         const aircraftScripts = {
             "Beechcraft Baron B55": "https://owennewo-dev.github.io/GeoFS-cockpit-realism/b55/b55.js",
+            "Embraer Phenom 100": "https://owennewo-dev.github.io/GeoFS-cockpit-realism/phenom/phenom.js",
         };
 
         if (aircraftScripts[aircraftName]) {

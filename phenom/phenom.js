@@ -57,9 +57,9 @@ function addMapDisplay() {
         "type": "none",
         "parent": "cockpit",
         "model": "https://owennewo-dev.github.io/GeoFS-cockpit-realism/b55/garmin-gns-530.glb",
-        "position": [0.22, 0.6275, 0.358],
-        "scale": [1.2, 1.2, 1.2],
-        "rotation": [0, 270, 90]
+        "position": [0, 4.2, 0.756],
+        "scale": [1, 1, 1],
+        "rotation": [0, 275, 90]
     }]);
     
     geofs.aircraft.instance.fixCockpitScale(geofs.aircraft.instance.definition.cockpitScaleFix);
