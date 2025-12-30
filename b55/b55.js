@@ -1,7 +1,23 @@
+// Namespace to avoid conflicts and enable cleanup
+window.geofsB55Addon = window.geofsB55Addon || {};
+
 let map;
 let mapCallback;
+let flightPlanInterval;
+let isInitialized = false;
 
 function initMap() {
+    // Safety: Check if already initialized
+    if (map) {
+        console.log('[B55] Map already initialized');
+        return;
+    }
+    
+    // Safety: Check for MapLibre
+    if (typeof maplibregl === 'undefined') {
+        console.error('[B55] MapLibre not loaded yet');
+        return;
+    }
     appendNewChild(document.head, 'link', { rel: 'stylesheet', href: 'https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.css' });
     appendNewChild(document.head, 'script', { src: 'https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.js' });
     const mapDiv = createTag("div", { id: 'map', style: 'width: 1024px; height: 1024px; padding: 0px; position: absolute; left: -9999px; top: -9999px;', });
@@ -141,8 +157,25 @@ function loadFlightplan(waypointArray) {
     map.jumpTo({ center: waypoints[0] });
 }
 
-document.getElementById("centerMap").parentElement.style.display = "none";
-document.getElementById("drawFlightPath").parentElement.style.display = "none";
+// Safety: Hide default GeoFS map controls if they exist
+function hideDefaultMapControls() {
+    const centerMap = document.getElementById("centerMap");
+    const drawFlightPath = document.getElementById("drawFlightPath");
+    
+    if (centerMap && centerMap.parentElement) {
+        centerMap.parentElement.style.display = "none";
+    }
+    if (drawFlightPath && drawFlightPath.parentElement) {
+        drawFlightPath.parentElement.style.display = "none";
+    }
+}
+
+// Defer execution until DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hideDefaultMapControls);
+} else {
+    hideDefaultMapControls();
+}
 
 //this is from LiverySelector
 
@@ -186,12 +219,93 @@ function appendNewChild(parent, tagName, attributes = {}, pos = -1) {
 }
 
 
-initMap();
-loadFlightplan();
-addMapDisplay();
-trackZoomKeys();
+// Cleanup function for aircraft changes
+function cleanup() {
+    console.log('[B55] Cleaning up...');
+    
+    if (mapCallback) {
+        try {
+            geofs.api.removeFrameCallback(mapCallback);
+            mapCallback = null;
+        } catch (e) {
+            console.error('[B55] Error removing frame callback:', e);
+        }
+    }
+    
+    if (flightPlanInterval) {
+        clearInterval(flightPlanInterval);
+        flightPlanInterval = null;
+    }
+    
+    if (map) {
+        try {
+            map.remove();
+            map = null;
+        } catch (e) {
+            console.error('[B55] Error removing map:', e);
+        }
+    }
+    
+    // Remove map div
+    const mapDiv = document.getElementById('map');
+    if (mapDiv) {
+        mapDiv.remove();
+    }
+    
+    isInitialized = false;
+}
 
-setInterval(function() {
-    console.log("Refreshing flight plan...");
-    loadFlightplan();
-}, 5000);
+// Safety: Initialize only if GeoFS is ready and not already initialized
+function safeInit() {
+    if (isInitialized) {
+        console.log('[B55] Already initialized, skipping');
+        return;
+    }
+    
+    if (typeof geofs === 'undefined' || !geofs.aircraft || !geofs.aircraft.instance) {
+        console.error('[B55] GeoFS not ready');
+        return;
+    }
+    
+    if (typeof maplibregl === 'undefined') {
+        console.error('[B55] MapLibre not loaded');
+        return;
+    }
+    
+    try {
+        console.log('[B55] Initializing...');
+        initMap();
+        
+        // Wait for map to be ready before loading flight plan
+        if (map) {
+            map.on('load', () => {
+                console.log('[B55] Map loaded');
+                loadFlightplan();
+            });
+        }
+        
+        addMapDisplay();
+        trackZoomKeys();
+        
+        // Efficiency: Use a single interval for flight plan updates
+        flightPlanInterval = setInterval(function() {
+            if (map && geofs.flightPlan && geofs.flightPlan.waypointArray) {
+                console.log("[B55] Refreshing flight plan...");
+                loadFlightplan();
+            }
+        }, 5000);
+        
+        isInitialized = true;
+        console.log('[B55] Initialization complete');
+    } catch (e) {
+        console.error('[B55] Initialization error:', e);
+    }
+}
+
+// Export cleanup for main script
+window.geofsAddonCleanup = cleanup;
+window.geofsB55Addon.cleanup = cleanup;
+window.geofsB55Addon.init = safeInit;
+
+// Initialize
+safeInit();

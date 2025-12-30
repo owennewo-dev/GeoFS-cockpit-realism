@@ -9,8 +9,31 @@ Aircraft to be supported in the near future:
 - de Havilland DHC6 Twin Otter
 - Airbus A350
 
-To use this addon, just paste the contents of `main.js` into your browser console.
+## Installation
 
-To use this addon at it's fullest with OpenAIP aeronautical overlays, create an account on https://www.openaip.net/. Then click this link https://www.openaip.net/user/api-clients, and click 'Create API Client'. Add a name, and a description (what you put in doesn't matter) then click 'Create'. Once it's done, click the copy button next to 'API Key'. Paste your API key into `main.js`, `window.openAIPKey = "YOUR_OPENAIP_API_KEY";`.
+### Manual (Browser Console)
+1. Paste the contents of `main.js` into your browser console while on the GeoFS website
+2. The addon will automatically load when you're in a supported aircraft
 
-So it would look like this: `window.openAIPKey = "968e2a38f015320b77a033e3f77ab506";`. You are now ready to fly!
+### Tampermonkey (Coming Soon)
+Install once and forget - the script will run automatically on every GeoFS visit.
+
+## Configuration
+
+### OpenAIP API Key (Optional)
+
+The addon works without an API key, but you can enable aeronautical overlays with OpenAIP:
+
+1. Look for the **Cockpit** button in the bottom menu bar (between Aircraft/Location/Camera and Options/Nav)
+2. Click it to open the configuration panel
+3. Follow the instructions to get a free OpenAIP API key
+4. Enter your key and click "Save Key"
+5. Reload the page
+
+The settings panel shows:
+- Current API key status
+- API key configuration field  
+- Step-by-step instructions for getting an API key
+- Version information (v0.2.0)
+
+**Security Note:** Your API key is stored locally in your browser's localStorage (not in the code), so it stays private and persists across sessions without being committed to GitHub or shared publicly.
