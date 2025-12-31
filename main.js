@@ -86,7 +86,7 @@
                 <div style="margin-top: 15px;">
                     <button id="geofs-addon-save-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" style="margin-right: 10px;">Save Key</button>
                     <button id="geofs-addon-clear-btn" class="mdl-button mdl-js-button mdl-button--raised" style="margin-right: 10px;">Clear Key</button>
-                    <button id="geofs-addon-refresh-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Refresh Waypoints</button>
+                    <button id="geofs-addon-refresh-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Send Flight Plan to Navigation Device</button>
                 </div>
             </li>
             <li class="geofs-list-collapsible-item">How to get an API key
