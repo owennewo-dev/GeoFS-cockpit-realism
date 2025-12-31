@@ -74,6 +74,9 @@
             <li style="text-align: center; font-size: 18px; font-weight: bold; padding: 20px 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                 Configuration for Cockpit Navigation Screen
             </li>
+            <li style="padding: 10px 15px; text-align: center;">
+                <button id="geofs-addon-refresh-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" style="width: 100%;">Send Flight Plan to Navigation Device</button>
+            </li>
             <li style="padding: 15px;">
                 <div style="margin-bottom: 15px;">
                     <strong>Status:</strong> <span style="color: ${hasKey ? '#4CAF50' : '#ff9800'};">${hasKey ? '✓ API Key Configured' : '⚠ No API Key Set'}</span>
@@ -86,21 +89,23 @@
                 <div style="margin-top: 15px;">
                     <button id="geofs-addon-save-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" style="margin-right: 10px;">Save Key</button>
                     <button id="geofs-addon-clear-btn" class="mdl-button mdl-js-button mdl-button--raised" style="margin-right: 10px;">Clear Key</button>
-                    <button id="geofs-addon-refresh-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Send Flight Plan to Navigation Device</button>
                 </div>
             </li>
-            <li class="geofs-list-collapsible-item">How to get an API key
-                <ul class="geofs-collapsible" style="padding: 15px; line-height: 1.6;">
-                    <li>1. Create a free account at <a href="https://www.openaip.net/" target="_blank" style="color: #4CAF50; text-decoration: underline;">openaip.net</a></li>
-                    <li>2. Visit <a href="https://www.openaip.net/user/api-clients" target="_blank" style="color: #4CAF50; text-decoration: underline;">API Clients page</a></li>
-                    <li>3. Click 'Create API Client'</li>
-                    <li>4. Add a name and description (any text works)</li>
-                    <li>5. Copy your API Key and paste it above</li>
-                    <li>6. Click 'Save Key'</li>
-                </ul>
+            <li style="padding: 15px;">
+                <div style="padding: 0 0 10px 0; line-height: 1.6;">
+                    <strong>How to get an API key</strong>
+                    <ol style="margin: 8px 0 0 20px; padding: 0;">
+                        <li>Create a free account at <a href="https://www.openaip.net/" target="_blank" style="color: #4CAF50; text-decoration: underline;">openaip.net</a></li>
+                        <li>Visit the <a href="https://www.openaip.net/user/api-clients" target="_blank" style="color: #4CAF50; text-decoration: underline;">API Clients page</a></li>
+                        <li>Click 'Create API Client'</li>
+                        <li>Add a name and description (any text works)</li>
+                        <li>Copy your API Key and paste it above</li>
+                        <li>Click 'Save Key'</li>
+                    </ol>
+                </div>
             </li>
             <li style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <div style="font-size: 12px; opacity: 0.5; text-align: center;">GeoFS Cockpit Realism v0.2.0</div>
+                <div style="font-size: 12px; opacity: 0.5; text-align: center;">GeoFS Cockpit Realism v0.3.0</div>
             </li>
         `;
 
