@@ -253,6 +253,7 @@ function cleanup() {
     }
     
     try { if (window.geofsAddonRefreshWaypoints === window.geofsB55Addon.reloadWaypoints) delete window.geofsAddonRefreshWaypoints; } catch(e) { }
+    try { if (window.geofsAddonToggleTerrain === window.geofsB55Addon.toggleTerrain) delete window.geofsAddonToggleTerrain; } catch(e) { }
     isInitialized = false;
 }
 
@@ -298,6 +299,21 @@ function safeInit() {
             }
         };
         window.geofsAddonRefreshWaypoints = window.geofsB55Addon.reloadWaypoints;
+
+        // Expose terrain toggle to main addon UI
+        window.geofsB55Addon.toggleTerrain = function() {
+            try{
+                if (map && map.getLayer && map.getLayer('hills')){
+                    const current = map.getLayoutProperty('hills', 'visibility') || 'visible';
+                    const next = current === 'none' ? 'visible' : 'none';
+                    map.setLayoutProperty('hills', 'visibility', next);
+                    console.log('[B55] Terrain layer visibility set to', next);
+                } else {
+                    console.warn('[B55] Terrain layer not present yet');
+                }
+            }catch(e){ console.error('[B55] Toggle terrain error:', e); }
+        };
+        window.geofsAddonToggleTerrain = window.geofsB55Addon.toggleTerrain;
         
         isInitialized = true;
         console.log('[B55] Initialization complete');

@@ -87,6 +87,7 @@ function showMap() {
 function destroy() {
     geofs.api.removeFrameCallback(mapCallback);
     try { if (window.geofsAddonRefreshWaypoints === window.geofsElectroAddon.reloadWaypoints) delete window.geofsAddonRefreshWaypoints; } catch(e) { }
+    try { if (window.geofsAddonToggleTerrain === window.geofsElectroAddon.toggleTerrain) delete window.geofsAddonToggleTerrain; } catch(e) { }
 }
 
 function loadFlightplan(waypointArray) {
@@ -203,3 +204,18 @@ window.geofsElectroAddon.reloadWaypoints = function() {
     }
 };
 window.geofsAddonRefreshWaypoints = window.geofsElectroAddon.reloadWaypoints;
+
+// Expose terrain toggle to main addon UI
+window.geofsElectroAddon.toggleTerrain = function() {
+    try{
+        if (map && map.getLayer && map.getLayer('hills')){
+            const current = map.getLayoutProperty('hills', 'visibility') || 'visible';
+            const next = current === 'none' ? 'visible' : 'none';
+            map.setLayoutProperty('hills', 'visibility', next);
+            console.log('[Electro] Terrain layer visibility set to', next);
+        } else {
+            console.warn('[Electro] Terrain layer not present yet');
+        }
+    }catch(e){ console.error('[Electro] Toggle terrain error:', e); }
+};
+window.geofsAddonToggleTerrain = window.geofsElectroAddon.toggleTerrain;

@@ -75,7 +75,10 @@
                 Configuration for Cockpit Navigation Screen
             </li>
             <li style="padding: 10px 15px; text-align: center;">
-                <button id="geofs-addon-refresh-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" style="width: 100%;">Send Flight Plan to Navigation Device</button>
+                <div style="display:flex; gap:8px;">
+                    <button id="geofs-addon-refresh-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" style="flex: 1;">Send Flight Plan</button>
+                    <button id="geofs-addon-toggle-terrain-btn" class="mdl-button mdl-js-button mdl-button--raised" style="flex: 1; background: #f44336; color: white;">TOGGLE MAP TERRAIN</button>
+                </div>
             </li>
             <li style="padding: 15px;">
                 <div style="margin-bottom: 15px;">
@@ -105,7 +108,7 @@
                 </div>
             </li>
             <li style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <div style="font-size: 12px; opacity: 0.5; text-align: center;">GeoFS Cockpit Realism v0.3.0</div>
+                <div style="font-size: 12px; opacity: 0.5; text-align: center;">GeoFS Cockpit Realism v0.4.0</div>
             </li>
         `;
 
@@ -179,6 +182,25 @@
                         }
                     }else{
                         alert('No map loaded for waypoint refresh. Switch to a supported aircraft first.');
+                    }
+                };
+            }
+
+            const toggleTerrainBtn = document.getElementById('geofs-addon-toggle-terrain-btn');
+            if(toggleTerrainBtn){
+                toggleTerrainBtn.onclick = () => {
+                    console.log('[GeoFS Cockpit Realism] Terrain toggle requested from UI');
+                    if(window.geofsAddonToggleTerrain && typeof window.geofsAddonToggleTerrain === 'function'){
+                        try{
+                            window.geofsAddonToggleTerrain();
+                            const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
+                            if(panelElement) panelElement.style.display = 'none';
+                        }catch(e){
+                            console.error('[GeoFS Cockpit Realism] Terrain toggle error:', e);
+                            alert('Terrain toggle failed. Check console for details.');
+                        }
+                    }else{
+                        alert('No map loaded for terrain toggle. Switch to a supported aircraft first.');
                     }
                 };
             }
