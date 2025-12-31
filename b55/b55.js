@@ -252,6 +252,7 @@ function cleanup() {
         mapDiv.remove();
     }
     
+    try { if (window.geofsAddonRefreshWaypoints === window.geofsB55Addon.reloadWaypoints) delete window.geofsAddonRefreshWaypoints; } catch(e) { }
     isInitialized = false;
 }
 
@@ -287,13 +288,16 @@ function safeInit() {
         addMapDisplay();
         trackZoomKeys();
         
-        // Efficiency: Use a single interval for flight plan updates
-        flightPlanInterval = setInterval(function() {
+        // Expose manual reload to main addon UI
+        window.geofsB55Addon.reloadWaypoints = function() {
             if (map && geofs.flightPlan && geofs.flightPlan.waypointArray) {
-                console.log("[B55] Refreshing flight plan...");
+                console.log("[B55] Manual refresh of flight plan requested");
                 loadFlightplan();
+            } else {
+                console.warn("[B55] No map or flight plan available to refresh");
             }
-        }, 5000);
+        };
+        window.geofsAddonRefreshWaypoints = window.geofsB55Addon.reloadWaypoints;
         
         isInitialized = true;
         console.log('[B55] Initialization complete');

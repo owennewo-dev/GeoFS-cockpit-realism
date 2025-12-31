@@ -191,7 +191,14 @@ loadFlightplan();
 addMapDisplay();
 trackZoomKeys();
 
-setInterval(function() {
-    console.log("Refreshing flight plan...");
-    loadFlightplan();
-}, 5000);
+// Expose manual reload to main addon UI
+window.geofsPhenomAddon = window.geofsPhenomAddon || {};
+window.geofsPhenomAddon.reloadWaypoints = function() {
+    if (map && geofs.flightPlan && geofs.flightPlan.waypointArray) {
+        console.log("[Phenom] Manual refresh of flight plan requested");
+        loadFlightplan();
+    } else {
+        console.warn("[Phenom] No map or flight plan available to refresh");
+    }
+};
+window.geofsAddonRefreshWaypoints = window.geofsPhenomAddon.reloadWaypoints;
