@@ -76,7 +76,7 @@
             </li>
             <li style="padding: 10px 15px; text-align: center;">
                 <div style="display:flex; gap:8px;">
-                    <button id="geofs-addon-map-heading-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" style="flex: 1;">MAP: HEADING UP</button>
+                    <button id="geofs-addon-map-heading-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" style="flex: 1;">MAP: NORTH UP</button>
                     <button id="geofs-addon-toggle-terrain-btn" class="mdl-button mdl-js-button mdl-button--raised" style="flex: 1; background: #f44336; color: white;">TOGGLE MAP TERRAIN</button>
                 </div>
             </li>
@@ -174,7 +174,9 @@
                     if(window.geofsAddonToggleMapHeading && typeof window.geofsAddonToggleMapHeading === 'function'){
                         try{
                             const mode = window.geofsAddonToggleMapHeading();
-                            mapHeadingBtn.textContent = 'MAP: ' + mode.toUpperCase();
+                            // Show opposite mode - what you'll switch TO next time
+                            const nextMode = mode === 'North Up' ? 'Heading Up' : 'North Up';
+                            mapHeadingBtn.textContent = 'MAP: ' + nextMode.toUpperCase();
                             const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
                             if(panelElement) panelElement.style.display = 'none';
                         }catch(e){
@@ -259,6 +261,100 @@
         flightPlanWaypoint.appendChild(syncButton);
 
         console.log('[GeoFS Cockpit Realism] Flight plan sync button added');
+    }
+
+    function addMapSearchButtonsToWaypoints(){
+        // Function to add map search button to a single waypoint
+        function addButtonToWaypoint(waypoint){
+            // Check if button already exists
+            if(waypoint.querySelector('.geofs-waypoint-map-search-btn')){
+                return;
+            }
+
+            // Find the delete button to insert after it
+            const deleteBtn = waypoint.querySelector('button[onclick*="geofs.flightplan.deleteWaypoint"]');
+            if(!deleteBtn){
+                return;
+            }
+
+            // Get the waypoint coordinates
+            const coordsSpan = waypoint.querySelector('.geofs-waypointCoords');
+            if(!coordsSpan){
+                return;
+            }
+
+            // Create the map search button
+            const mapSearchBtn = document.createElement('button');
+            mapSearchBtn.className = 'mdl-button mdl-js-button mdl-button--icon geofs-flightplanAction geofs-waypoint-map-search-btn';
+            mapSearchBtn.title = 'Show on Map';
+            mapSearchBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Parse coordinates from the span text (format: "lat, lon")
+                const coordsText = coordsSpan.textContent.trim();
+                const coords = coordsText.split(',').map(c => parseFloat(c.trim()));
+                
+                if(coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])){
+                    const lat = coords[0];
+                    const lon = coords[1];
+                    
+                    console.log(`[GeoFS Cockpit Realism] Moving map to waypoint: ${lat}, ${lon}`);
+                    
+                    // Check if map exists and move to location
+                    if(window.geofsB55Addon && window.geofsB55Addon.centerMapOnLocation){
+                        try{
+                            window.geofsB55Addon.centerMapOnLocation(lat, lon);
+                        }catch(e){
+                            console.error('[GeoFS Cockpit Realism] Error centering map:', e);
+                            alert('Failed to move map. Check console for details.');
+                        }
+                    }else{
+                        alert('No map loaded. Switch to a supported aircraft first.');
+                    }
+                }else{
+                    console.error('[GeoFS Cockpit Realism] Invalid coordinates:', coordsText);
+                    alert('Invalid waypoint coordinates.');
+                }
+            };
+
+            // Create the icon
+            const icon = document.createElement('i');
+            icon.className = 'material-icons';
+            icon.textContent = 'map_search';
+            mapSearchBtn.appendChild(icon);
+
+            // Insert after the delete button
+            deleteBtn.parentNode.insertBefore(mapSearchBtn, deleteBtn.nextSibling);
+        }
+
+        // Monitor the flight plan list for changes
+        const flightPlanList = document.querySelector('.geofs-flightPlanList');
+        if(!flightPlanList){
+            console.warn('[GeoFS Cockpit Realism] Flight plan list not found, will retry...');
+            return;
+        }
+
+        // Add buttons to existing waypoints
+        const waypoints = flightPlanList.querySelectorAll('.geofs-flightPlanWaypoint');
+        waypoints.forEach(addButtonToWaypoint);
+
+        // Set up MutationObserver to watch for new waypoints
+        if(!window.geofsAddonState.waypointObserver){
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    mutation.addedNodes.forEach((node) => {
+                        if(node.nodeType === 1 && node.classList && node.classList.contains('geofs-flightPlanWaypoint')){
+                            addButtonToWaypoint(node);
+                        }
+                    });
+                });
+            });
+
+            observer.observe(flightPlanList, { childList: true, subtree: true });
+            window.geofsAddonState.waypointObserver = observer;
+            console.log('[GeoFS Cockpit Realism] Waypoint observer initialized');
+        }
     }
 
     function promptForAPIKeyIfNeeded(){
@@ -364,6 +460,7 @@
                     console.log('[GeoFS Cockpit Realism] Creating settings UI...');
                     createSettingsUI();
                     addFlightPlanSyncButton();
+                    addMapSearchButtonsToWaypoints();
                     promptForAPIKeyIfNeeded();
                     loadMapLibre((err) => {
                         if(!err){ checkAndRunAircraftScript(); monitorAircraftChanges(); }else{ console.error('[GeoFS Cockpit Realism] Failed to load MapLibre'); }

@@ -101,6 +101,18 @@ function showMap() {
     geofs.aircraft.instance.parts["map"].object3d.model.setTextureFromCanvas(map.painter.context.gl, 0)
 }
 
+function centerMapOnLocation(lat, lon) {
+    if (!map) {
+        console.error("[B55] Map instance is not initialized!");
+        return;
+    }
+    console.log(`[B55] Centering map on: ${lat}, ${lon}`);
+    map.jumpTo({
+        center: [lon, lat],
+        zoom: 10
+    });
+}
+
 function destroy() {
     geofs.api.removeFrameCallback(mapCallback);
 }
@@ -324,6 +336,9 @@ function safeInit() {
             return mode;
         };
         window.geofsAddonToggleMapHeading = window.geofsB55Addon.toggleMapHeading;
+
+        // Expose center map on location to main addon UI
+        window.geofsB55Addon.centerMapOnLocation = centerMapOnLocation;
         
         isInitialized = true;
         console.log('[B55] Initialization complete');
