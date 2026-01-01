@@ -5,6 +5,7 @@ let map;
 let mapCallback;
 let flightPlanInterval;
 let isInitialized = false;
+let mapNorthUp = false; // Toggle between north-up and heading alignment
 
 function initMap() {
     // Safety: Check if already initialized
@@ -95,7 +96,7 @@ function trackZoomKeys() {
 function showMap() {
     map.jumpTo({
         center: [geofs.aircraft.instance.llaLocation[1], geofs.aircraft.instance.llaLocation[0]],
-        bearing: geofs.animation.values.heading360
+        bearing: mapNorthUp ? 0 : geofs.animation.values.heading360
     })
     geofs.aircraft.instance.parts["map"].object3d.model.setTextureFromCanvas(map.painter.context.gl, 0)
 }
@@ -314,6 +315,15 @@ function safeInit() {
             }catch(e){ console.error('[B55] Toggle terrain error:', e); }
         };
         window.geofsAddonToggleTerrain = window.geofsB55Addon.toggleTerrain;
+
+        // Expose map heading toggle to main addon UI
+        window.geofsB55Addon.toggleMapHeading = function() {
+            mapNorthUp = !mapNorthUp;
+            const mode = mapNorthUp ? 'North Up' : 'Heading Up';
+            console.log('[B55] Map heading mode set to', mode);
+            return mode;
+        };
+        window.geofsAddonToggleMapHeading = window.geofsB55Addon.toggleMapHeading;
         
         isInitialized = true;
         console.log('[B55] Initialization complete');

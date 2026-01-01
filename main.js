@@ -76,7 +76,7 @@
             </li>
             <li style="padding: 10px 15px; text-align: center;">
                 <div style="display:flex; gap:8px;">
-                    <button id="geofs-addon-refresh-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" style="flex: 1;">Send Flight Plan</button>
+                    <button id="geofs-addon-map-heading-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" style="flex: 1;">MAP: HEADING UP</button>
                     <button id="geofs-addon-toggle-terrain-btn" class="mdl-button mdl-js-button mdl-button--raised" style="flex: 1; background: #f44336; color: white;">TOGGLE MAP TERRAIN</button>
                 </div>
             </li>
@@ -167,21 +167,22 @@
                 };
             }
 
-            const refreshBtn = document.getElementById('geofs-addon-refresh-btn');
-            if(refreshBtn){
-                refreshBtn.onclick = () => {
-                    console.log('[GeoFS Cockpit Realism] Manual waypoint refresh requested from UI');
-                    if(window.geofsAddonRefreshWaypoints && typeof window.geofsAddonRefreshWaypoints === 'function'){
+            const mapHeadingBtn = document.getElementById('geofs-addon-map-heading-btn');
+            if(mapHeadingBtn){
+                mapHeadingBtn.onclick = () => {
+                    console.log('[GeoFS Cockpit Realism] Map heading toggle requested from UI');
+                    if(window.geofsAddonToggleMapHeading && typeof window.geofsAddonToggleMapHeading === 'function'){
                         try{
-                            window.geofsAddonRefreshWaypoints();
+                            const mode = window.geofsAddonToggleMapHeading();
+                            mapHeadingBtn.textContent = 'MAP: ' + mode.toUpperCase();
                             const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
                             if(panelElement) panelElement.style.display = 'none';
                         }catch(e){
-                            console.error('[GeoFS Cockpit Realism] Refresh error:', e);
-                            alert('Waypoint refresh failed. Check console for details.');
+                            console.error('[GeoFS Cockpit Realism] Map heading toggle error:', e);
+                            alert('Map heading toggle failed. Check console for details.');
                         }
                     }else{
-                        alert('No map loaded for waypoint refresh. Switch to a supported aircraft first.');
+                        alert('No map loaded for heading toggle. Switch to a supported aircraft first.');
                     }
                 };
             }
@@ -207,6 +208,57 @@
         }, 100);
 
         console.log('[GeoFS Cockpit Realism] Settings UI integrated into menu');
+    }
+
+    function addFlightPlanSyncButton(){
+        // Check if button already exists
+        if(document.getElementById('geofs-flightplan-sync-btn')){
+            console.log('[GeoFS Cockpit Realism] Flight plan sync button already exists');
+            return;
+        }
+
+        // Find the flight plan waypoint controls container
+        const flightPlanWaypoint = document.getElementById('flightPlanWaypoint');
+        if(!flightPlanWaypoint){
+            console.warn('[GeoFS Cockpit Realism] Flight plan waypoint container not found');
+            return;
+        }
+
+        // Reduce the width of the text field to make room for the new button
+        const textFieldContainer = flightPlanWaypoint.querySelector('.mdl-textfield');
+        if(textFieldContainer){
+            textFieldContainer.style.width = '250px';
+        }
+
+        // Create the sync button
+        const syncButton = document.createElement('button');
+        syncButton.className = 'mdl-button mdl-js-button mdl-button--icon geofs-flightplanAction';
+        syncButton.id = 'geofs-flightplan-sync-btn';
+        syncButton.title = 'Send Flight Plan to Map';
+        syncButton.onclick = () => {
+            console.log('[GeoFS Cockpit Realism] Flight plan sync requested from map UI');
+            if(window.geofsAddonRefreshWaypoints && typeof window.geofsAddonRefreshWaypoints === 'function'){
+                try{
+                    window.geofsAddonRefreshWaypoints();
+                }catch(e){
+                    console.error('[GeoFS Cockpit Realism] Sync error:', e);
+                    alert('Waypoint sync failed. Check console for details.');
+                }
+            }else{
+                alert('No map loaded for waypoint sync. Switch to a supported aircraft first.');
+            }
+        };
+
+        // Create the icon
+        const icon = document.createElement('i');
+        icon.className = 'material-icons';
+        icon.textContent = 'sync';
+        syncButton.appendChild(icon);
+
+        // Append the button at the end of the container
+        flightPlanWaypoint.appendChild(syncButton);
+
+        console.log('[GeoFS Cockpit Realism] Flight plan sync button added');
     }
 
     function promptForAPIKeyIfNeeded(){
@@ -311,6 +363,7 @@
                 setTimeout(() => {
                     console.log('[GeoFS Cockpit Realism] Creating settings UI...');
                     createSettingsUI();
+                    addFlightPlanSyncButton();
                     promptForAPIKeyIfNeeded();
                     loadMapLibre((err) => {
                         if(!err){ checkAndRunAircraftScript(); monitorAircraftChanges(); }else{ console.error('[GeoFS Cockpit Realism] Failed to load MapLibre'); }
