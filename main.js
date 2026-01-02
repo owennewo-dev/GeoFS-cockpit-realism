@@ -74,14 +74,88 @@
             <li style="text-align: center; font-size: 18px; font-weight: bold; padding: 20px 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                 Configuration for Cockpit Navigation Screen
             </li>
-            <li style="padding: 10px 15px; text-align: center;">
-                <div style="display:flex; gap:8px;">
-                    <button id="geofs-addon-map-heading-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" style="flex: 1;">MAP: NORTH UP</button>
-                    <button id="geofs-addon-toggle-terrain-btn" class="mdl-button mdl-js-button mdl-button--raised" style="flex: 1; background: #f44336; color: white;">DISABLE TERRAIN</button>
-                    <button id="geofs-addon-toggle-satellite-btn" class="mdl-button mdl-js-button mdl-button--raised" style="flex: 1; background: #4CAF50; color: white;">ENABLE SATELLITE IMAGERY</button>
+            <style>
+                .geofs-addon-toggle-container {
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: center;
+                    padding: 12px 15px;
+                    border-bottom: 1px solid rgba(255,255,255,0.1);
+                    gap: 12px;
+                }
+                .geofs-addon-toggle-label {
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: #000000;
+                }
+                .geofs-addon-toggle-switch {
+                    position: relative;
+                    display: inline-block;
+                    width: 50px;
+                    height: 24px;
+                }
+                .geofs-addon-toggle-switch input {
+                    opacity: 0;
+                    width: 0;
+                    height: 0;
+                }
+                .geofs-addon-toggle-slider {
+                    position: absolute;
+                    cursor: pointer;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: #ccc;
+                    transition: 0.3s;
+                    border-radius: 24px;
+                }
+                .geofs-addon-toggle-slider:before {
+                    position: absolute;
+                    content: "";
+                    height: 18px;
+                    width: 18px;
+                    left: 3px;
+                    bottom: 3px;
+                    background-color: white;
+                    transition: 0.3s;
+                    border-radius: 50%;
+                }
+                .geofs-addon-toggle-switch input:checked + .geofs-addon-toggle-slider {
+                    background-color: #4CAF50;
+                }
+                .geofs-addon-toggle-switch input:checked + .geofs-addon-toggle-slider:before {
+                    transform: translateX(26px);
+                }
+            </style>
+            <li style="padding: 10px 0;">
+                <div class="geofs-addon-toggle-container">
+                    <label class="geofs-addon-toggle-switch">
+                        <input type="checkbox" id="geofs-addon-map-heading-toggle">
+                        <span class="geofs-addon-toggle-slider"></span>
+                    </label>
+                    <span class="geofs-addon-toggle-label">North Up Mode</span>
                 </div>
-                <div style="display:flex; gap:8px; margin-top: 8px;">
-                    <button id="geofs-addon-toggle-keyboard-btn" class="mdl-button mdl-js-button mdl-button--raised" style="flex: 1; background: #2196F3; color: white;">ENABLE KEYBOARD ARROWS</button>
+                <div class="geofs-addon-toggle-container">
+                    <label class="geofs-addon-toggle-switch">
+                        <input type="checkbox" id="geofs-addon-toggle-terrain-toggle" checked>
+                        <span class="geofs-addon-toggle-slider"></span>
+                    </label>
+                    <span class="geofs-addon-toggle-label">Terrain</span>
+                </div>
+                <div class="geofs-addon-toggle-container">
+                    <label class="geofs-addon-toggle-switch">
+                        <input type="checkbox" id="geofs-addon-toggle-satellite-toggle">
+                        <span class="geofs-addon-toggle-slider"></span>
+                    </label>
+                    <span class="geofs-addon-toggle-label">Satellite Imagery</span>
+                </div>
+                <div class="geofs-addon-toggle-container">
+                    <label class="geofs-addon-toggle-switch">
+                        <input type="checkbox" id="geofs-addon-toggle-keyboard-toggle">
+                        <span class="geofs-addon-toggle-slider"></span>
+                    </label>
+                    <span class="geofs-addon-toggle-label">Keyboard Arrow Controls</span>
                 </div>
             </li>
             <li style="padding: 15px;">
@@ -171,88 +245,86 @@
                 };
             }
 
-            const mapHeadingBtn = document.getElementById('geofs-addon-map-heading-btn');
-            if(mapHeadingBtn){
-                mapHeadingBtn.onclick = () => {
+            const mapHeadingToggle = document.getElementById('geofs-addon-map-heading-toggle');
+            if(mapHeadingToggle){
+                mapHeadingToggle.onchange = () => {
                     console.log('[GeoFS Cockpit Realism] Map heading toggle requested from UI');
                     if(window.geofsAddonToggleMapHeading && typeof window.geofsAddonToggleMapHeading === 'function'){
                         try{
-                            const mode = window.geofsAddonToggleMapHeading();
-                            // Show opposite mode - what you'll switch TO next time
-                            const nextMode = mode === 'North Up' ? 'Heading Up' : 'North Up';
-                            mapHeadingBtn.textContent = 'MAP: ' + nextMode.toUpperCase();
+                            window.geofsAddonToggleMapHeading();
                             const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
                             if(panelElement) panelElement.style.display = 'none';
                         }catch(e){
                             console.error('[GeoFS Cockpit Realism] Map heading toggle error:', e);
                             alert('Map heading toggle failed. Check console for details.');
+                            mapHeadingToggle.checked = !mapHeadingToggle.checked;
                         }
                     }else{
                         alert('No map loaded for heading toggle. Switch to a supported aircraft first.');
+                        mapHeadingToggle.checked = !mapHeadingToggle.checked;
                     }
                 };
             }
 
-            const toggleTerrainBtn = document.getElementById('geofs-addon-toggle-terrain-btn');
-            if(toggleTerrainBtn){
-                toggleTerrainBtn.onclick = () => {
+            const toggleTerrainToggle = document.getElementById('geofs-addon-toggle-terrain-toggle');
+            if(toggleTerrainToggle){
+                toggleTerrainToggle.onchange = () => {
                     console.log('[GeoFS Cockpit Realism] Terrain toggle requested from UI');
                     if(window.geofsAddonToggleTerrain && typeof window.geofsAddonToggleTerrain === 'function'){
                         try{
-                            const newState = window.geofsAddonToggleTerrain();
-                            if(newState !== null){
-                                toggleTerrainBtn.textContent = newState === 'visible' ? 'DISABLE TERRAIN' : 'ENABLE TERRAIN';
-                            }
+                            window.geofsAddonToggleTerrain();
                             const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
                             if(panelElement) panelElement.style.display = 'none';
                         }catch(e){
                             console.error('[GeoFS Cockpit Realism] Terrain toggle error:', e);
                             alert('Terrain toggle failed. Check console for details.');
+                            toggleTerrainToggle.checked = !toggleTerrainToggle.checked;
                         }
                     }else{
                         alert('No map loaded for terrain toggle. Switch to a supported aircraft first.');
+                        toggleTerrainToggle.checked = !toggleTerrainToggle.checked;
                     }
                 };
             }
 
-            const toggleSatelliteBtn = document.getElementById('geofs-addon-toggle-satellite-btn');
-            if(toggleSatelliteBtn){
-                toggleSatelliteBtn.onclick = () => {
+            const toggleSatelliteToggle = document.getElementById('geofs-addon-toggle-satellite-toggle');
+            if(toggleSatelliteToggle){
+                toggleSatelliteToggle.onchange = () => {
                     console.log('[GeoFS Cockpit Realism] Satellite imagery toggle requested from UI');
                     if(window.geofsAddonToggleSatelliteImagery && typeof window.geofsAddonToggleSatelliteImagery === 'function'){
                         try{
-                            const newState = window.geofsAddonToggleSatelliteImagery();
-                            if(newState !== null){
-                                toggleSatelliteBtn.textContent = newState === 'visible' ? 'DISABLE SATELLITE IMAGERY' : 'ENABLE SATELLITE IMAGERY';
-                            }
+                            window.geofsAddonToggleSatelliteImagery();
                             const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
                             if(panelElement) panelElement.style.display = 'none';
                         }catch(e){
                             console.error('[GeoFS Cockpit Realism] Satellite imagery toggle error:', e);
                             alert('Satellite imagery toggle failed. Check console for details.');
+                            toggleSatelliteToggle.checked = !toggleSatelliteToggle.checked;
                         }
                     }else{
                         alert('No map loaded for satellite imagery toggle. Switch to a supported aircraft first.');
+                        toggleSatelliteToggle.checked = !toggleSatelliteToggle.checked;
                     }
                 };
             }
 
-            const toggleKeyboardBtn = document.getElementById('geofs-addon-toggle-keyboard-btn');
-            if(toggleKeyboardBtn){
-                toggleKeyboardBtn.onclick = () => {
+            const toggleKeyboardToggle = document.getElementById('geofs-addon-toggle-keyboard-toggle');
+            if(toggleKeyboardToggle){
+                toggleKeyboardToggle.onchange = () => {
                     console.log('[GeoFS Cockpit Realism] Keyboard arrows toggle requested from UI');
                     if(window.geofsAddonToggleKeyboardArrows && typeof window.geofsAddonToggleKeyboardArrows === 'function'){
                         try{
-                            const isEnabled = window.geofsAddonToggleKeyboardArrows();
-                            toggleKeyboardBtn.textContent = isEnabled ? 'RECENTER MAP' : 'ENABLE KEYBOARD ARROWS';
+                            window.geofsAddonToggleKeyboardArrows();
                             const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
                             if(panelElement) panelElement.style.display = 'none';
                         }catch(e){
                             console.error('[GeoFS Cockpit Realism] Keyboard arrows toggle error:', e);
                             alert('Keyboard arrows toggle failed. Check console for details.');
+                            toggleKeyboardToggle.checked = !toggleKeyboardToggle.checked;
                         }
                     }else{
                         alert('No map loaded for keyboard arrows toggle. Switch to a supported aircraft first.');
+                        toggleKeyboardToggle.checked = !toggleKeyboardToggle.checked;
                     }
                 };
             }
@@ -402,17 +474,40 @@
             }
 
             leafletMapVisible = !leafletMapVisible;
+            
+            // Get native GeoFS map controls
+            const centerMapBtn = document.getElementById('centerMap');
+            const drawFlightPathBtn = document.getElementById('drawFlightPath');
+            
             if(leafletMapVisible){
                 leafletMap.style.display = '';
                 icon.textContent = 'visibility_off';
                 toggleButton.title = 'Hide Native Map';
                 tooltip.textContent = 'Hide Native Map';
+                
+                // Show native map controls
+                if(centerMapBtn && centerMapBtn.parentElement){
+                    centerMapBtn.parentElement.style.display = '';
+                }
+                if(drawFlightPathBtn && drawFlightPathBtn.parentElement){
+                    drawFlightPathBtn.parentElement.style.display = '';
+                }
+                
                 console.log('[GeoFS Cockpit Realism] Leaflet map shown');
             }else{
                 leafletMap.style.display = 'none';
                 icon.textContent = 'visibility';
                 toggleButton.title = 'Show Native Map';
                 tooltip.textContent = 'Show Native Map';
+                
+                // Hide native map controls
+                if(centerMapBtn && centerMapBtn.parentElement){
+                    centerMapBtn.parentElement.style.display = 'none';
+                }
+                if(drawFlightPathBtn && drawFlightPathBtn.parentElement){
+                    drawFlightPathBtn.parentElement.style.display = 'none';
+                }
+                
                 console.log('[GeoFS Cockpit Realism] Leaflet map hidden');
             }
         };
