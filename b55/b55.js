@@ -208,6 +208,11 @@ function enableKeyboardArrows() {
         return;
     }
     
+    if (!map) {
+        console.warn('[B55] Cannot enable keyboard arrows - map not initialized');
+        return;
+    }
+    
     keyboardHandler = function(e) {
         // Only handle arrow keys
         if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
