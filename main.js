@@ -3,27 +3,17 @@
 
     function getOpenAIPKey(){
         let key = localStorage.getItem('geofsOpenAIPKey');
-        if(!key || key === 'YOUR_OPENAIP_API_KEY' || key === ''){
-            return '';
-        }
-        return key;
+        return (!key || key === 'YOUR_OPENAIP_API_KEY') ? '' : key;
     }
 
     window.geofsAddonRestart = function(){
         console.log('[GeoFS Cockpit Realism] Restarting addon...');
-        if(window.geofsAddonCleanup && typeof window.geofsAddonCleanup === 'function'){
-            try{
-                window.geofsAddonCleanup();
-            }catch(e){
-                console.error('[GeoFS Cockpit Realism] Cleanup error:', e);
-            }
+        if(typeof window.geofsAddonCleanup === 'function'){
+            try{ window.geofsAddonCleanup(); }catch(e){ console.error('Cleanup error:', e); }
         }
 
-        const existingPanel = document.querySelector('.geofs-cockpit-addon-panel');
-        if(existingPanel) existingPanel.remove();
-
-        const existingBtn = document.querySelector('[data-toggle-panel=".geofs-cockpit-addon-panel"]');
-        if(existingBtn) existingBtn.remove();
+        document.querySelector('.geofs-cockpit-addon-panel')?.remove();
+        document.querySelector('[data-toggle-panel=".geofs-cockpit-addon-panel"]')?.remove();
 
         if(window.geofsAddonState){
             const aircraftScriptUrls = Object.values({
@@ -32,129 +22,63 @@
             });
 
             window.geofsAddonState.loadedScripts.forEach(script => {
-                if(!aircraftScriptUrls.includes(script)){
-                    window.geofsAddonState.loadedScripts.delete(script);
-                }
+                if(!aircraftScriptUrls.includes(script)) window.geofsAddonState.loadedScripts.delete(script);
             });
-
             window.geofsAddonState.currentAircraftId = null;
         }
-
-        setTimeout(() => { initializeAddon(); }, 100);
+        setTimeout(initializeAddon, 100);
     };
 
     function createSettingsUI(){
         if(document.querySelector('.geofs-cockpit-addon-panel')) return;
 
         const currentKey = localStorage.getItem('geofsOpenAIPKey') || '';
-        const hasKey = currentKey && currentKey !== 'YOUR_OPENAIP_API_KEY' && currentKey !== '';
+        const hasKey = currentKey && currentKey !== 'YOUR_OPENAIP_API_KEY';
 
         const aircraftBtn = document.querySelector('[data-toggle-panel=".geofs-aircraft-list"]');
-        console.log('[GeoFS Cockpit Realism] Aircraft button found:', aircraftBtn);
-        if(!aircraftBtn){
-            console.warn('[GeoFS Cockpit Realism] Could not find aircraft button to clone');
-            return;
-        }
+        if(!aircraftBtn) return;
 
         const cockpitBtn = aircraftBtn.cloneNode(true);
         cockpitBtn.textContent = 'Cockpit';
-        cockpitBtn.removeAttribute('data-toggle-panel');
         cockpitBtn.setAttribute('data-toggle-panel', '.geofs-cockpit-addon-panel');
-        cockpitBtn.setAttribute('title', 'Cockpit Navigation Screen Settings');
-        cockpitBtn.removeAttribute('id');
+        cockpitBtn.title = 'Cockpit Navigation Screen Settings';
         cockpitBtn.id = 'cockpit-button';
 
         aircraftBtn.parentNode.insertBefore(cockpitBtn, aircraftBtn.nextSibling);
 
         const panel = document.createElement('ul');
         panel.className = 'geofs-list geofs-toggle-panel geofs-cockpit-addon-panel';
-        panel.style.cssText = 'display: none;';
+        panel.style.display = 'none';
 
         panel.innerHTML = `
             <li style="text-align: center; font-size: 18px; font-weight: bold; padding: 20px 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                 Configuration for Cockpit Navigation Screen
             </li>
             <style>
-                .geofs-addon-toggle-container {
-                    display: flex;
-                    justify-content: flex-start;
-                    align-items: center;
-                    padding: 12px 15px;
-                    border-bottom: 1px solid rgba(255,255,255,0.1);
-                    gap: 12px;
-                }
-                .geofs-addon-toggle-label {
-                    font-size: 16px;
-                    font-weight: 500;
-                    color: #000000;
-                }
-                .geofs-addon-toggle-switch {
-                    position: relative;
-                    display: inline-block;
-                    width: 50px;
-                    height: 24px;
-                }
-                .geofs-addon-toggle-switch input {
-                    opacity: 0;
-                    width: 0;
-                    height: 0;
-                }
-                .geofs-addon-toggle-slider {
-                    position: absolute;
-                    cursor: pointer;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background-color: #ccc;
-                    transition: 0.3s;
-                    border-radius: 24px;
-                }
-                .geofs-addon-toggle-slider:before {
-                    position: absolute;
-                    content: "";
-                    height: 18px;
-                    width: 18px;
-                    left: 3px;
-                    bottom: 3px;
-                    background-color: white;
-                    transition: 0.3s;
-                    border-radius: 50%;
-                }
-                .geofs-addon-toggle-switch input:checked + .geofs-addon-toggle-slider {
-                    background-color: #4CAF50;
-                }
-                .geofs-addon-toggle-switch input:checked + .geofs-addon-toggle-slider:before {
-                    transform: translateX(26px);
-                }
+                .geofs-addon-toggle-container { display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.1); gap: 12px; }
+                .geofs-addon-toggle-label { font-size: 16px; font-weight: 500; color: #000; }
+                .geofs-addon-toggle-switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+                .geofs-addon-toggle-switch input { opacity: 0; width: 0; height: 0; }
+                .geofs-addon-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.3s; border-radius: 24px; }
+                .geofs-addon-toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; }
+                .geofs-addon-toggle-switch input:checked + .geofs-addon-toggle-slider { background-color: #4CAF50; }
+                .geofs-addon-toggle-switch input:checked + .geofs-addon-toggle-slider:before { transform: translateX(26px); }
             </style>
             <li style="padding: 10px 0;">
                 <div class="geofs-addon-toggle-container">
-                    <label class="geofs-addon-toggle-switch">
-                        <input type="checkbox" id="geofs-addon-map-heading-toggle">
-                        <span class="geofs-addon-toggle-slider"></span>
-                    </label>
+                    <label class="geofs-addon-toggle-switch"><input type="checkbox" id="geofs-addon-map-heading-toggle"><span class="geofs-addon-toggle-slider"></span></label>
                     <span class="geofs-addon-toggle-label">North Up Mode</span>
                 </div>
                 <div class="geofs-addon-toggle-container">
-                    <label class="geofs-addon-toggle-switch">
-                        <input type="checkbox" id="geofs-addon-toggle-terrain-toggle" checked>
-                        <span class="geofs-addon-toggle-slider"></span>
-                    </label>
+                    <label class="geofs-addon-toggle-switch"><input type="checkbox" id="geofs-addon-toggle-terrain-toggle" checked><span class="geofs-addon-toggle-slider"></span></label>
                     <span class="geofs-addon-toggle-label">Terrain</span>
                 </div>
                 <div class="geofs-addon-toggle-container">
-                    <label class="geofs-addon-toggle-switch">
-                        <input type="checkbox" id="geofs-addon-toggle-satellite-toggle">
-                        <span class="geofs-addon-toggle-slider"></span>
-                    </label>
+                    <label class="geofs-addon-toggle-switch"><input type="checkbox" id="geofs-addon-toggle-satellite-toggle"><span class="geofs-addon-toggle-slider"></span></label>
                     <span class="geofs-addon-toggle-label">Satellite Imagery</span>
                 </div>
                 <div class="geofs-addon-toggle-container">
-                    <label class="geofs-addon-toggle-switch">
-                        <input type="checkbox" id="geofs-addon-toggle-keyboard-toggle">
-                        <span class="geofs-addon-toggle-slider"></span>
-                    </label>
+                    <label class="geofs-addon-toggle-switch"><input type="checkbox" id="geofs-addon-toggle-keyboard-toggle"><span class="geofs-addon-toggle-slider"></span></label>
                     <span class="geofs-addon-toggle-label">Keyboard Arrow Controls</span>
                 </div>
             </li>
@@ -163,8 +87,7 @@
                     <strong>Status:</strong> <span style="color: ${hasKey ? '#4CAF50' : '#ff9800'};">${hasKey ? '✓ API Key Configured' : '⚠ No API Key Set'}</span>
                 </div>
                 <label style="display: block; margin-bottom: 10px;">
-                    <strong>OpenAIP API Key:</strong><br>
-                    <span style="font-size: 12px; opacity: 0.7;">For aeronautical charts and navigation data</span>
+                    <strong>OpenAIP API Key:</strong><br><span style="font-size: 12px; opacity: 0.7;">For aeronautical charts and navigation data</span>
                 </label>
                 <input type="text" id="geofs-addon-api-key-input" class="geofs-stopKeyboardPropagation geofs-stopKeyupPropagation geofs-stopMousePropagation" value="${currentKey}" placeholder="Enter your OpenAIP API key" style="width: 100%; padding: 8px; margin-top: 5px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 3px; box-sizing: border-box; font-family: monospace;">
                 <div style="margin-top: 15px;">
@@ -186,29 +109,18 @@
                 </div>
             </li>
             <li style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <div style="font-size: 12px; opacity: 0.5; text-align: center;">GeoFS Cockpit Realism v0.9.0</div>
+                <div style="font-size: 12px; opacity: 0.5; text-align: center;">GeoFS Cockpit Realism v0.10.0</div>
             </li>
         `;
 
         const aircraftPanel = document.querySelector('.geofs-aircraft-list');
-        if(aircraftPanel && aircraftPanel.parentNode){
-            aircraftPanel.parentNode.insertBefore(panel, aircraftPanel.nextSibling);
-        }else{
-            document.body.appendChild(panel);
-        }
+        if(aircraftPanel?.parentNode) aircraftPanel.parentNode.insertBefore(panel, aircraftPanel.nextSibling);
+        else document.body.appendChild(panel);
 
-        cockpitBtn.addEventListener('click', function(){
-            if(panel.style.display === 'block'){
-                panel.style.display = 'none';
-            }else{
-                panel.style.display = 'block';
-            }
-        });
+        cockpitBtn.addEventListener('click', () => panel.style.display = panel.style.display === 'block' ? 'none' : 'block');
 
         document.querySelectorAll('[data-toggle-panel]').forEach(btn => {
-            if(btn.id !== 'cockpit-button'){
-                btn.addEventListener('click', function(){ panel.style.display = 'none'; });
-            }
+            if(btn.id !== 'cockpit-button') btn.addEventListener('click', () => panel.style.display = 'none');
         });
 
         setTimeout(() => {
@@ -216,433 +128,211 @@
             const clearBtn = document.getElementById('geofs-addon-clear-btn');
             const input = document.getElementById('geofs-addon-api-key-input');
 
-            if(saveBtn){
-                saveBtn.onclick = () => {
-                    const newKey = input.value.trim();
-                    if(newKey){
-                        localStorage.setItem('geofsOpenAIPKey', newKey);
-                        window.openAIPKey = newKey;
-                        const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
-                        if(panelElement) panelElement.style.display = 'none';
-                        console.log('[GeoFS Cockpit Realism] API key saved, restarting...');
-                        window.geofsAddonRestart();
-                    }else{
-                        alert('Please enter a valid API key.');
-                    }
-                };
-            }
+            if(saveBtn) saveBtn.onclick = () => {
+                const newKey = input.value.trim();
+                if(newKey){
+                    localStorage.setItem('geofsOpenAIPKey', newKey);
+                    window.openAIPKey = newKey;
+                    if(document.querySelector('.geofs-cockpit-addon-panel')) document.querySelector('.geofs-cockpit-addon-panel').style.display = 'none';
+                    window.geofsAddonRestart();
+                } else alert('Please enter a valid API key.');
+            };
 
-            if(clearBtn){
-                clearBtn.onclick = () => {
-                    if(confirm('Are you sure you want to clear your API key?')){
-                        localStorage.removeItem('geofsOpenAIPKey');
-                        window.openAIPKey = '';
-                        const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
-                        if(panelElement) panelElement.style.display = 'none';
-                        console.log('[GeoFS Cockpit Realism] API key cleared, restarting...');
-                        window.geofsAddonRestart();
-                    }
-                };
-            }
+            if(clearBtn) clearBtn.onclick = () => {
+                if(confirm('Are you sure you want to clear your API key?')){
+                    localStorage.removeItem('geofsOpenAIPKey');
+                    window.openAIPKey = '';
+                    if(document.querySelector('.geofs-cockpit-addon-panel')) document.querySelector('.geofs-cockpit-addon-panel').style.display = 'none';
+                    window.geofsAddonRestart();
+                }
+            };
 
-            const mapHeadingToggle = document.getElementById('geofs-addon-map-heading-toggle');
-            if(mapHeadingToggle){
-                mapHeadingToggle.onchange = () => {
-                    console.log('[GeoFS Cockpit Realism] Map heading toggle requested from UI');
-                    if(window.geofsAddonToggleMapHeading && typeof window.geofsAddonToggleMapHeading === 'function'){
-                        try{
-                            window.geofsAddonToggleMapHeading();
-                            const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
-                            if(panelElement) panelElement.style.display = 'none';
-                        }catch(e){
-                            console.error('[GeoFS Cockpit Realism] Map heading toggle error:', e);
-                            alert('Map heading toggle failed. Check console for details.');
-                            mapHeadingToggle.checked = !mapHeadingToggle.checked;
+            const setupToggle = (id, funcName, errorMsg) => {
+                const toggle = document.getElementById(id);
+                if(toggle) toggle.onchange = () => {
+                    if(typeof window[funcName] === 'function'){
+                        try {
+                            window[funcName]();
+                            if(document.querySelector('.geofs-cockpit-addon-panel')) document.querySelector('.geofs-cockpit-addon-panel').style.display = 'none';
+                        } catch(e) {
+                            console.error(errorMsg, e);
+                            toggle.checked = !toggle.checked;
                         }
-                    }else{
-                        alert('No map loaded for heading toggle. Switch to a supported aircraft first.');
-                        mapHeadingToggle.checked = !mapHeadingToggle.checked;
+                    } else {
+                        alert('No map loaded. Switch to a supported aircraft first.');
+                        toggle.checked = !toggle.checked;
                     }
                 };
-            }
+            };
 
-            const toggleTerrainToggle = document.getElementById('geofs-addon-toggle-terrain-toggle');
-            if(toggleTerrainToggle){
-                toggleTerrainToggle.onchange = () => {
-                    console.log('[GeoFS Cockpit Realism] Terrain toggle requested from UI');
-                    if(window.geofsAddonToggleTerrain && typeof window.geofsAddonToggleTerrain === 'function'){
-                        try{
-                            window.geofsAddonToggleTerrain();
-                            const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
-                            if(panelElement) panelElement.style.display = 'none';
-                        }catch(e){
-                            console.error('[GeoFS Cockpit Realism] Terrain toggle error:', e);
-                            alert('Terrain toggle failed. Check console for details.');
-                            toggleTerrainToggle.checked = !toggleTerrainToggle.checked;
-                        }
-                    }else{
-                        alert('No map loaded for terrain toggle. Switch to a supported aircraft first.');
-                        toggleTerrainToggle.checked = !toggleTerrainToggle.checked;
-                    }
-                };
-            }
+            setupToggle('geofs-addon-map-heading-toggle', 'geofsAddonToggleMapHeading', 'Map heading toggle error:');
+            setupToggle('geofs-addon-toggle-terrain-toggle', 'geofsAddonToggleTerrain', 'Terrain toggle error:');
+            setupToggle('geofs-addon-toggle-satellite-toggle', 'geofsAddonToggleSatelliteImagery', 'Satellite imagery toggle error:');
+            setupToggle('geofs-addon-toggle-keyboard-toggle', 'geofsAddonToggleKeyboardArrows', 'Keyboard arrows toggle error:');
 
-            const toggleSatelliteToggle = document.getElementById('geofs-addon-toggle-satellite-toggle');
-            if(toggleSatelliteToggle){
-                toggleSatelliteToggle.onchange = () => {
-                    console.log('[GeoFS Cockpit Realism] Satellite imagery toggle requested from UI');
-                    if(window.geofsAddonToggleSatelliteImagery && typeof window.geofsAddonToggleSatelliteImagery === 'function'){
-                        try{
-                            window.geofsAddonToggleSatelliteImagery();
-                            const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
-                            if(panelElement) panelElement.style.display = 'none';
-                        }catch(e){
-                            console.error('[GeoFS Cockpit Realism] Satellite imagery toggle error:', e);
-                            alert('Satellite imagery toggle failed. Check console for details.');
-                            toggleSatelliteToggle.checked = !toggleSatelliteToggle.checked;
-                        }
-                    }else{
-                        alert('No map loaded for satellite imagery toggle. Switch to a supported aircraft first.');
-                        toggleSatelliteToggle.checked = !toggleSatelliteToggle.checked;
-                    }
-                };
-            }
-
-            const toggleKeyboardToggle = document.getElementById('geofs-addon-toggle-keyboard-toggle');
-            if(toggleKeyboardToggle){
-                toggleKeyboardToggle.onchange = () => {
-                    console.log('[GeoFS Cockpit Realism] Keyboard arrows toggle requested from UI');
-                    if(window.geofsAddonToggleKeyboardArrows && typeof window.geofsAddonToggleKeyboardArrows === 'function'){
-                        try{
-                            window.geofsAddonToggleKeyboardArrows();
-                            const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
-                            if(panelElement) panelElement.style.display = 'none';
-                        }catch(e){
-                            console.error('[GeoFS Cockpit Realism] Keyboard arrows toggle error:', e);
-                            alert('Keyboard arrows toggle failed. Check console for details.');
-                            toggleKeyboardToggle.checked = !toggleKeyboardToggle.checked;
-                        }
-                    }else{
-                        alert('No map loaded for keyboard arrows toggle. Switch to a supported aircraft first.');
-                        toggleKeyboardToggle.checked = !toggleKeyboardToggle.checked;
-                    }
-                };
-            }
         }, 100);
-
-        console.log('[GeoFS Cockpit Realism] Settings UI integrated into menu');
+        console.log('[GeoFS Cockpit Realism] Settings UI integrated');
     }
 
     function addFlightPlanSyncButton(){
-        // Check if button already exists
-        if(document.getElementById('geofs-flightplan-sync-btn')){
-            console.log('[GeoFS Cockpit Realism] Flight plan sync button already exists');
-            return;
-        }
+        if(document.getElementById('geofs-flightplan-sync-btn')) return;
 
-        // Find the flight plan waypoint controls container
         const flightPlanWaypoint = document.getElementById('flightPlanWaypoint');
-        if(!flightPlanWaypoint){
-            console.warn('[GeoFS Cockpit Realism] Flight plan waypoint container not found');
-            return;
-        }
+        if(!flightPlanWaypoint) return;
 
-        // Reduce the width of the text field to make room for the new buttons
         const textFieldContainer = flightPlanWaypoint.querySelector('.mdl-textfield');
-        if(textFieldContainer){
-            textFieldContainer.style.width = '200px';
-        }
+        if(textFieldContainer) textFieldContainer.style.width = '200px';
 
-        // Create the sync button
         const syncButton = document.createElement('button');
         syncButton.className = 'mdl-button mdl-js-button mdl-button--icon geofs-flightplanAction';
         syncButton.id = 'geofs-flightplan-sync-btn';
         syncButton.title = 'Sync Flight Plan to Navigation Device';
         syncButton.onclick = () => {
-            console.log('[GeoFS Cockpit Realism] Flight plan sync requested from map UI');
-            if(window.geofsAddonRefreshWaypoints && typeof window.geofsAddonRefreshWaypoints === 'function'){
-                try{
-                    window.geofsAddonRefreshWaypoints();
-                }catch(e){
-                    console.error('[GeoFS Cockpit Realism] Sync error:', e);
-                    alert('Waypoint sync failed. Check console for details.');
-                }
-            }else{
-                alert('No map loaded for waypoint sync. Switch to a supported aircraft first.');
-            }
+            if(typeof window.geofsAddonRefreshWaypoints === 'function'){
+                try{ window.geofsAddonRefreshWaypoints(); }catch(e){ console.error('Sync error:', e); alert('Waypoint sync failed.'); }
+            }else alert('No map loaded for waypoint sync. Switch to a supported aircraft first.');
         };
 
-        // Create the icon
         const icon = document.createElement('i');
         icon.className = 'material-icons';
         icon.textContent = 'sync';
         syncButton.appendChild(icon);
-
-        // Append the button at the end of the container
         flightPlanWaypoint.appendChild(syncButton);
-
-        console.log('[GeoFS Cockpit Realism] Flight plan sync button added');
     }
 
     function addRecenterMapButton(){
-        // Check if button already exists
-        if(document.getElementById('geofs-recenter-map-btn')){
-            console.log('[GeoFS Cockpit Realism] Recenter map button already exists');
-            return;
-        }
+        if(document.getElementById('geofs-recenter-map-btn')) return;
 
-        // Find the flight plan waypoint controls container
         const flightPlanWaypoint = document.getElementById('flightPlanWaypoint');
-        if(!flightPlanWaypoint){
-            console.warn('[GeoFS Cockpit Realism] Flight plan waypoint container not found');
-            return;
-        }
+        if(!flightPlanWaypoint) return;
 
-        // Create the recenter button
         const recenterButton = document.createElement('button');
         recenterButton.className = 'mdl-button mdl-js-button mdl-button--icon geofs-flightplanAction';
         recenterButton.id = 'geofs-recenter-map-btn';
         recenterButton.title = 'Recenter Map on Aircraft';
         recenterButton.onclick = () => {
-            console.log('[GeoFS Cockpit Realism] Recenter map requested');
-            if(window.geofsB55Addon && window.geofsB55Addon.recenterOnAircraft){
-                try{
-                    window.geofsB55Addon.recenterOnAircraft();
-                }catch(e){
-                    console.error('[GeoFS Cockpit Realism] Recenter error:', e);
-                    alert('Failed to recenter map. Check console for details.');
-                }
-            }else{
-                alert('No map loaded. Switch to a supported aircraft first.');
-            }
+            if(window.geofsB55Addon?.recenterOnAircraft){
+                try{ window.geofsB55Addon.recenterOnAircraft(); }catch(e){ console.error('Recenter error:', e); alert('Failed to recenter map.'); }
+            }else alert('No map loaded. Switch to a supported aircraft first.');
         };
 
-        // Create the icon
         const icon = document.createElement('i');
         icon.className = 'material-icons';
         icon.textContent = 'navigation';
         recenterButton.appendChild(icon);
-
-        // Append the button at the end of the container
         flightPlanWaypoint.appendChild(recenterButton);
-
-        console.log('[GeoFS Cockpit Realism] Recenter map button added');
     }
 
     function addToggleLeafletMapButton(){
-        // Check if button already exists
-        if(document.getElementById('geofs-toggle-leaflet-btn')){
-            console.log('[GeoFS Cockpit Realism] Toggle leaflet button already exists');
-            return;
-        }
+        if(document.getElementById('geofs-toggle-leaflet-btn')) return;
 
-        // Find the flight plan waypoint controls container
         const flightPlanWaypoint = document.getElementById('flightPlanWaypoint');
-        if(!flightPlanWaypoint){
-            console.warn('[GeoFS Cockpit Realism] Flight plan waypoint container not found');
-            return;
-        }
+        if(!flightPlanWaypoint) return;
 
-        // Track leaflet map state (true = visible, false = hidden)
         let leafletMapVisible = true;
 
-        // Create the toggle button
         const toggleButton = document.createElement('button');
         toggleButton.className = 'mdl-button mdl-js-button mdl-button--icon geofs-flightplanAction';
         toggleButton.id = 'geofs-toggle-leaflet-btn';
         toggleButton.title = 'Hide Native Map';
 
-        // Create the icon
         const icon = document.createElement('i');
         icon.className = 'material-icons';
         icon.textContent = 'visibility_off';
         toggleButton.appendChild(icon);
 
-        // Create an MDL tooltip element bound to this button
         const tooltip = document.createElement('div');
         tooltip.className = 'mdl-tooltip';
         tooltip.setAttribute('for', toggleButton.id);
         tooltip.textContent = 'Hide Native Map';
 
         toggleButton.onclick = () => {
-            console.log('[GeoFS Cockpit Realism] Toggle leaflet map requested');
             const leafletMap = document.querySelector('.geofs-map-viewport');
-            if(!leafletMap){
-                console.warn('[GeoFS Cockpit Realism] Leaflet map not found');
-                alert('Native map element not found.');
-                return;
-            }
+            if(!leafletMap) return alert('Native map element not found.');
 
             leafletMapVisible = !leafletMapVisible;
-            
-            // Get native GeoFS map controls
             const centerMapBtn = document.getElementById('centerMap');
             const drawFlightPathBtn = document.getElementById('drawFlightPath');
             
-            if(leafletMapVisible){
-                leafletMap.style.display = '';
-                icon.textContent = 'visibility_off';
-                toggleButton.title = 'Hide Native Map';
-                tooltip.textContent = 'Hide Native Map';
-                
-                // Show native map controls
-                if(centerMapBtn && centerMapBtn.parentElement){
-                    centerMapBtn.parentElement.style.display = '';
-                }
-                if(drawFlightPathBtn && drawFlightPathBtn.parentElement){
-                    drawFlightPathBtn.parentElement.style.display = '';
-                }
-                
-                console.log('[GeoFS Cockpit Realism] Leaflet map shown');
-            }else{
-                leafletMap.style.display = 'none';
-                icon.textContent = 'visibility';
-                toggleButton.title = 'Show Native Map';
-                tooltip.textContent = 'Show Native Map';
-                
-                // Hide native map controls
-                if(centerMapBtn && centerMapBtn.parentElement){
-                    centerMapBtn.parentElement.style.display = 'none';
-                }
-                if(drawFlightPathBtn && drawFlightPathBtn.parentElement){
-                    drawFlightPathBtn.parentElement.style.display = 'none';
-                }
-                
-                console.log('[GeoFS Cockpit Realism] Leaflet map hidden');
-            }
+            leafletMap.style.display = leafletMapVisible ? '' : 'none';
+            icon.textContent = leafletMapVisible ? 'visibility_off' : 'visibility';
+            toggleButton.title = leafletMapVisible ? 'Hide Native Map' : 'Show Native Map';
+            tooltip.textContent = toggleButton.title;
+            
+            [centerMapBtn, drawFlightPathBtn].forEach(btn => {
+                if(btn?.parentElement) btn.parentElement.style.display = leafletMapVisible ? '' : 'none';
+            });
         };
 
-        // Append the button and tooltip at the end of the container
         flightPlanWaypoint.appendChild(toggleButton);
         flightPlanWaypoint.appendChild(tooltip);
-
-        console.log('[GeoFS Cockpit Realism] Toggle leaflet button added');
     }
 
     function addMapSearchButtonsToWaypoints(){
-        // Add CSS to adjust waypoint element widths to prevent button wrapping
         if(!document.getElementById('geofs-waypoint-compact-style')){
             const style = document.createElement('style');
             style.id = 'geofs-waypoint-compact-style';
-            style.textContent = `
-                .geofs-flightPlanWaypoint .geofs-waypointProperty,
-                .geofs-flightplanheader .geofs-waypointProperty {
-                    width: 60px !important;
-                }
-            `;
+            style.textContent = `.geofs-flightPlanWaypoint .geofs-waypointProperty, .geofs-flightplanheader .geofs-waypointProperty { width: 60px !important; }`;
             document.head.appendChild(style);
         }
         
-        // Function to add map search button to a single waypoint
         function addButtonToWaypoint(waypoint){
-            // Check if button already exists
-            if(waypoint.querySelector('.geofs-waypoint-map-search-btn')){
-                return;
-            }
+            if(waypoint.querySelector('.geofs-waypoint-map-search-btn')) return;
 
-            // Find the delete button - the onclick is on the <i> inside the button
             const deleteIcon = waypoint.querySelector('i[onclick*="geofs.flightPlan.deleteWaypoint"]');
-            if(!deleteIcon){
-                return;
-            }
-            const deleteBtn = deleteIcon.closest('button');
-            if(!deleteBtn){
-                return;
-            }
-
-            // Get the waypoint coordinates
+            const deleteBtn = deleteIcon?.closest('button');
             const coordsSpan = waypoint.querySelector('.geofs-waypointCoords');
-            if(!coordsSpan){
-                return;
-            }
+            if(!deleteBtn || !coordsSpan) return;
 
-            // Create the map search button
             const mapSearchBtn = document.createElement('button');
             mapSearchBtn.className = 'mdl-button mdl-js-button mdl-button--icon geofs-flightplanAction geofs-waypoint-map-search-btn';
             mapSearchBtn.title = 'Show on Map';
             mapSearchBtn.onclick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Parse coordinates from the span text (format: "lat, lon")
-                const coordsText = coordsSpan.textContent.trim();
-                const coords = coordsText.split(',').map(c => parseFloat(c.trim()));
+                e.preventDefault(); e.stopPropagation();
+                const coords = coordsSpan.textContent.trim().split(',').map(c => parseFloat(c.trim()));
                 
                 if(coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])){
-                    const lat = coords[0];
-                    const lon = coords[1];
-                    
-                    console.log(`[GeoFS Cockpit Realism] Moving map to waypoint: ${lat}, ${lon}`);
-                    
-                    // Check if map exists and move to location
-                    if(window.geofsB55Addon && window.geofsB55Addon.centerMapOnLocation){
-                        try{
-                            window.geofsB55Addon.centerMapOnLocation(lat, lon);
-                        }catch(e){
-                            console.error('[GeoFS Cockpit Realism] Error centering map:', e);
-                            alert('Failed to move map. Check console for details.');
-                        }
-                    }else{
-                        alert('No map loaded. Switch to a supported aircraft first.');
-                    }
-                }else{
-                    console.error('[GeoFS Cockpit Realism] Invalid coordinates:', coordsText);
-                    alert('Invalid waypoint coordinates.');
-                }
+                    if(window.geofsB55Addon?.centerMapOnLocation){
+                        try{ window.geofsB55Addon.centerMapOnLocation(coords[0], coords[1]); }catch(e){ console.error('Error centering map:', e); }
+                    }else alert('No map loaded. Switch to a supported aircraft first.');
+                }else alert('Invalid waypoint coordinates.');
             };
 
-            // Create the icon
             const icon = document.createElement('i');
             icon.className = 'material-icons';
             icon.textContent = 'map';
             mapSearchBtn.appendChild(icon);
-
-            // Insert after the delete button
             deleteBtn.parentNode.insertBefore(mapSearchBtn, deleteBtn.nextSibling);
         }
 
-        // Monitor the flight plan list for changes
         const flightPlanList = document.querySelector('.geofs-flightPlanList');
-        if(!flightPlanList){
-            console.warn('[GeoFS Cockpit Realism] Flight plan list not found, will retry...');
-            return;
-        }
+        if(!flightPlanList) return;
 
-        // Add buttons to existing waypoints
-        const waypoints = flightPlanList.querySelectorAll('.geofs-flightPlanWaypoint');
-        waypoints.forEach(addButtonToWaypoint);
+        flightPlanList.querySelectorAll('.geofs-flightPlanWaypoint').forEach(addButtonToWaypoint);
 
-        // Set up MutationObserver to watch for new waypoints
         if(!window.geofsAddonState.waypointObserver){
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
                     mutation.addedNodes.forEach((node) => {
-                        if(node.nodeType === 1 && node.classList && node.classList.contains('geofs-flightPlanWaypoint')){
-                            addButtonToWaypoint(node);
-                        }
+                        if(node.nodeType === 1 && node.classList?.contains('geofs-flightPlanWaypoint')) addButtonToWaypoint(node);
                     });
                 });
             });
-
             observer.observe(flightPlanList, { childList: true, subtree: true });
             window.geofsAddonState.waypointObserver = observer;
-            console.log('[GeoFS Cockpit Realism] Waypoint observer initialized');
         }
     }
 
     function promptForAPIKeyIfNeeded(){
         const key = localStorage.getItem('geofsOpenAIPKey');
-        const hasSeenPrompt = localStorage.getItem('geofsAddonSeenPrompt');
-        if((!key || key === '') && !hasSeenPrompt){
+        if((!key || key === '') && !localStorage.getItem('geofsAddonSeenPrompt')){
             localStorage.setItem('geofsAddonSeenPrompt', 'true');
             setTimeout(() => {
-                if(confirm('GeoFS Cockpit Realism: Would you like to configure your OpenAIP API key now for aeronautical overlays?\n\n(You can always configure this later using the settings button)')){
+                if(confirm('GeoFS Cockpit Realism: Configure OpenAIP API key now?\n\n(You can configure this later in settings)')){
                     createSettingsUI();
                     const panel = document.querySelector('.geofs-cockpit-addon-panel');
-                    if(panel){ panel.style.display = 'block'; const input = document.getElementById('geofs-addon-api-key-input'); if(input) input.focus(); }
-                }else{
-                    alert('No problem! The addon will work without OpenAIP overlays.\n\nYou can configure your API key anytime by clicking the "⚙️ Cockpit Addon" button in the bottom-right corner.');
-                }
+                    if(panel){ panel.style.display = 'block'; document.getElementById('geofs-addon-api-key-input')?.focus(); }
+                }else alert('Addon will work without OpenAIP overlays. Configure anytime via "⚙️ Cockpit Addon".');
             }, 2000);
         }
     }
@@ -666,20 +356,19 @@
 
         function loadScript(url, callback){
             if(window.geofsAddonState.loadedScripts.has(url)){
-                console.log(`[GeoFS Cockpit Realism] Script already loaded: ${url}`);
                 if(callback) callback();
                 return;
             }
             const script = document.createElement('script');
             script.src = url;
-            script.onload = () => { window.geofsAddonState.loadedScripts.add(url); console.log(`[GeoFS Cockpit Realism] Script loaded: ${url}`); if(callback) callback(); };
-            script.onerror = () => { console.error(`[GeoFS Cockpit Realism] Failed to load script: ${url}`); if(callback) callback(new Error(`Failed to load ${url}`)); };
+            script.onload = () => { window.geofsAddonState.loadedScripts.add(url); console.log(`Loaded: ${url}`); if(callback) callback(); };
+            script.onerror = () => { console.error(`Failed to load: ${url}`); if(callback) callback(new Error(`Failed to load ${url}`)); };
             document.head.appendChild(script);
         }
 
         function loadMapLibre(callback){
-            if(window.geofsAddonState.mapLibreLoaded || typeof maplibregl !== 'undefined'){ window.geofsAddonState.mapLibreLoaded = true; console.log("[GeoFS Cockpit Realism] MapLibre already loaded"); if(callback) callback(); return; }
-            loadScript("https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.js", (err) => { if(!err){ window.geofsAddonState.mapLibreLoaded = true; console.log("[GeoFS Cockpit Realism] MapLibre loaded"); } if(callback) callback(err); });
+            if(window.geofsAddonState.mapLibreLoaded || typeof maplibregl !== 'undefined'){ window.geofsAddonState.mapLibreLoaded = true; if(callback) callback(); return; }
+            loadScript("https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.js", (err) => { if(!err) window.geofsAddonState.mapLibreLoaded = true; if(callback) callback(err); });
         }
 
         const aircraftScripts = {
@@ -688,49 +377,42 @@
         };
 
         function checkAndRunAircraftScript(){
-            if(typeof geofs === 'undefined' || !geofs.aircraft || !geofs.aircraft.instance){ console.warn('[GeoFS Cockpit Realism] GeoFS not ready yet'); return; }
+            if(typeof geofs === 'undefined' || !geofs.aircraft?.instance) return;
             const aircraftId = geofs.aircraft.instance.id;
             const aircraftName = geofs.aircraftList[aircraftId]?.name;
-            console.log(`[GeoFS Cockpit Realism] Current Aircraft: ${aircraftName} (ID: ${aircraftId})`);
-            if(window.geofsAddonState.currentAircraftId === aircraftId && window.geofsAddonState.loadedScripts.size > 1){ console.log(`[GeoFS Cockpit Realism] Already initialized for this aircraft`); return; }
+            
+            if(window.geofsAddonState.currentAircraftId === aircraftId && window.geofsAddonState.loadedScripts.size > 1) return;
+            
+            console.log(`[GeoFS Cockpit Realism] Aircraft: ${aircraftName} (${aircraftId})`);
             window.geofsAddonState.currentAircraftId = aircraftId;
-            if(window.geofsAddonCleanup && typeof window.geofsAddonCleanup === 'function'){ try{ window.geofsAddonCleanup(); }catch(e){ console.error('[GeoFS Cockpit Realism] Cleanup error:', e); } }
+            
+            if(typeof window.geofsAddonCleanup === 'function') try{ window.geofsAddonCleanup(); }catch(e){ console.error('Cleanup error:', e); }
+            
             if(aircraftScripts[aircraftName]){
                 const scriptUrl = aircraftScripts[aircraftName];
-                const isScriptLoaded = window.geofsAddonState.loadedScripts.has(scriptUrl);
-                if(isScriptLoaded && window.geofsB55Addon && typeof window.geofsB55Addon.init === 'function' && aircraftName === "Beechcraft Baron B55"){
-                    console.log(`[GeoFS Cockpit Realism] Re-initializing B55 with updated settings...`);
-                    try{ window.geofsB55Addon.init(); }catch(e){ console.error('[GeoFS Cockpit Realism] Re-initialization error:', e); }
-                }else if(!isScriptLoaded){
-                    console.log(`[GeoFS Cockpit Realism] Loading script: ${scriptUrl}`);
+                if(window.geofsAddonState.loadedScripts.has(scriptUrl) && window.geofsB55Addon?.init && aircraftName === "Beechcraft Baron B55"){
+                    console.log(`Re-initializing B55...`);
+                    try{ window.geofsB55Addon.init(); }catch(e){ console.error('Re-init error:', e); }
+                }else if(!window.geofsAddonState.loadedScripts.has(scriptUrl)){
                     loadScript(scriptUrl);
-                }else{
-                    console.log(`[GeoFS Cockpit Realism] Script already loaded but no init function available`);
                 }
-            }else{
-                console.log(`[GeoFS Cockpit Realism] Aircraft "${aircraftName}" not supported yet`);
             }
         }
 
         function monitorAircraftChanges(){
             window.geofsAddonState.monitorInterval = setInterval(() => {
-                if(window.geofsAddonState.geofsReady && geofs.aircraft && geofs.aircraft.instance){
-                    const newAircraftId = geofs.aircraft.instance.id;
-                    if(newAircraftId !== window.geofsAddonState.currentAircraftId){
-                        console.log('[GeoFS Cockpit Realism] Aircraft changed, reloading...');
-                        checkAndRunAircraftScript();
-                    }
+                if(window.geofsAddonState.geofsReady && geofs.aircraft?.instance?.id !== window.geofsAddonState.currentAircraftId){
+                    checkAndRunAircraftScript();
                 }
             }, 1000);
         }
 
         window.geofsAddonState.readyInterval = setInterval(() => {
-            if(typeof geofs !== "undefined" && geofs.aircraft && geofs.aircraft.instance){
+            if(typeof geofs !== "undefined" && geofs.aircraft?.instance){
                 clearInterval(window.geofsAddonState.readyInterval);
                 window.geofsAddonState.geofsReady = true;
                 console.log('[GeoFS Cockpit Realism] GeoFS ready');
                 setTimeout(() => {
-                    console.log('[GeoFS Cockpit Realism] Creating settings UI...');
                     createSettingsUI();
                     addFlightPlanSyncButton();
                     addRecenterMapButton();
@@ -738,7 +420,7 @@
                     addMapSearchButtonsToWaypoints();
                     promptForAPIKeyIfNeeded();
                     loadMapLibre((err) => {
-                        if(!err){ checkAndRunAircraftScript(); monitorAircraftChanges(); }else{ console.error('[GeoFS Cockpit Realism] Failed to load MapLibre'); }
+                        if(!err){ checkAndRunAircraftScript(); monitorAircraftChanges(); }
                     });
                 }, 2000);
             }
