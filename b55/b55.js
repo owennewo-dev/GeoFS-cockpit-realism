@@ -98,7 +98,7 @@ function initMap() {
                     'layout': {
                         'icon-image': 'airplane-icon',
                         // Increased size for better visibility in cockpit display
-                        'icon-size': 1.8,
+                        'icon-size': 1.5,
                         'icon-rotate': ['get', 'bearing'],
                         'icon-rotation-alignment': 'map',
                         'icon-allow-overlap': true,
@@ -156,10 +156,9 @@ function showMap() {
     // Update airplane icon position and rotation
     const aircraftSource = map.getSource('aircraft-position');
     if (aircraftSource) {
-        // In heading-up mode: map rotates, so icon should point up (rotation = 0)
-        // In north-up mode: map is fixed, so icon should rotate to show heading
-        const iconRotation = mapNorthUp ? heading : 0;
-        
+        // Icon always rotates to match aircraft heading
+        // With icon-rotation-alignment: 'map', the icon points to the heading in map coordinates
+        // This works correctly in both HEADING UP and NORTH UP modes
         aircraftSource.setData({
             'type': 'Feature',
             'geometry': {
@@ -167,7 +166,7 @@ function showMap() {
                 'coordinates': [lon, lat]
             },
             'properties': {
-                'bearing': iconRotation
+                'bearing': heading
             }
         });
     }
