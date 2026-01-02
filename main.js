@@ -271,8 +271,12 @@
                 return;
             }
 
-            // Find the delete button to insert after it
-            const deleteBtn = waypoint.querySelector('button[onclick*="geofs.flightplan.deleteWaypoint"]');
+            // Find the delete button - the onclick is on the <i> inside the button
+            const deleteIcon = waypoint.querySelector('i[onclick*="geofs.flightPlan.deleteWaypoint"]');
+            if(!deleteIcon){
+                return;
+            }
+            const deleteBtn = deleteIcon.closest('button');
             if(!deleteBtn){
                 return;
             }

@@ -6,6 +6,7 @@ let mapCallback;
 let flightPlanInterval;
 let isInitialized = false;
 let mapNorthUp = false; // Toggle between north-up and heading alignment
+let mapFollowAircraft = true; // Whether map should auto-center on aircraft
 
 // Airplane icon as SVG data URL (black fill) - larger resolution for scaling
 const airplaneIconSvg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="black" viewBox="0 0 16 16"><path d="M6.428 1.151C6.708.591 7.213 0 8 0s1.292.592 1.572 1.151C9.861 1.73 10 2.431 10 3v3.691l5.17 2.585a1.5 1.5 0 0 1 .83 1.342V12a.5.5 0 0 1-.582.493l-5.507-.918-.375 2.253 1.318 1.318A.5.5 0 0 1 10.5 16h-5a.5.5 0 0 1-.354-.854l1.319-1.318-.376-2.253-5.507.918A.5.5 0 0 1 0 12v-1.382a1.5 1.5 0 0 1 .83-1.342L6 6.691V3c0-.568.14-1.271.428-1.849"/></svg>');
@@ -148,10 +149,13 @@ function showMap() {
     const lat = geofs.aircraft.instance.llaLocation[0];
     const heading = geofs.animation.values.heading360;
     
-    map.jumpTo({
-        center: [lon, lat],
-        bearing: mapNorthUp ? 0 : heading
-    });
+    // Only center map on aircraft if following is enabled
+    if (mapFollowAircraft) {
+        map.jumpTo({
+            center: [lon, lat],
+            bearing: mapNorthUp ? 0 : heading
+        });
+    }
     
     // Update airplane icon position and rotation
     const aircraftSource = map.getSource('aircraft-position');
@@ -180,6 +184,7 @@ function centerMapOnLocation(lat, lon) {
         return;
     }
     console.log(`[B55] Centering map on: ${lat}, ${lon}`);
+    mapFollowAircraft = false; // Disable auto-centering on aircraft
     map.jumpTo({
         center: [lon, lat],
         zoom: 10
@@ -412,6 +417,14 @@ function safeInit() {
 
         // Expose center map on location to main addon UI
         window.geofsB55Addon.centerMapOnLocation = centerMapOnLocation;
+        
+        // Expose toggle map follow function
+        window.geofsB55Addon.toggleMapFollow = function() {
+            mapFollowAircraft = !mapFollowAircraft;
+            console.log('[B55] Map follow aircraft:', mapFollowAircraft);
+            return mapFollowAircraft;
+        };
+        window.geofsAddonToggleMapFollow = window.geofsB55Addon.toggleMapFollow;
         
         isInitialized = true;
         console.log('[B55] Initialization complete');
