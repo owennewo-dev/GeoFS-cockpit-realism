@@ -21,13 +21,8 @@ function initMap() {
         return;
     }
     
-    // Safety: Check for MapLibre
-    if (typeof maplibregl === 'undefined') {
-        console.error('[B55] MapLibre not loaded yet');
-        return;
-    }
+    // Ensure MapLibre CSS is available (script is loaded in safeInit if needed)
     appendNewChild(document.head, 'link', { rel: 'stylesheet', href: 'https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.css' });
-    appendNewChild(document.head, 'script', { src: 'https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.js' });
     const mapDiv = createTag("div", { id: 'map', style: 'width: 1024px; height: 1024px; padding: 0px; position: absolute; left: -9999px; top: -9999px;', });
     document.body.appendChild(mapDiv);
     map = new maplibregl.Map({
@@ -328,12 +323,7 @@ function loadFlightplan(waypointArray) {
     map.jumpTo({ center: waypoints[0] });
 }
 
-// Defer execution until DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', hideDefaultMapControls);
-} else {
-    hideDefaultMapControls();
-}
+// Previously hid native controls; removed to avoid affecting our custom map.
 
 //this is from LiverySelector
 
@@ -428,7 +418,12 @@ function safeInit() {
     }
     
     if (typeof maplibregl === 'undefined') {
-        console.error('[B55] MapLibre not loaded');
+        // Load MapLibre (CSS already appended in initMap)
+        appendNewChild(document.head, 'link', { rel: 'stylesheet', href: 'https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.css' });
+        loadMapLibre(function() {
+            // Retry initialization once MapLibre is ready
+            safeInit();
+        });
         return;
     }
     
