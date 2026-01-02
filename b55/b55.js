@@ -227,7 +227,7 @@ function enableKeyboardArrows() {
         mapFollowAircraft = false;
         
         const center = map.getCenter();
-        const panDistance = 0.05; // degrees to pan per keypress
+        const panDistance = 0.02; // degrees to pan per keypress
         
         // Get current map bearing (rotation) to move relative to viewing orientation
         const bearing = map.getBearing();
