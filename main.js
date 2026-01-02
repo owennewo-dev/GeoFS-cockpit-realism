@@ -109,7 +109,7 @@
                 </div>
             </li>
             <li style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <div style="font-size: 12px; opacity: 0.5; text-align: center;">GeoFS Cockpit Realism v0.7.0</div>
+                <div style="font-size: 12px; opacity: 0.5; text-align: center;">GeoFS Cockpit Realism v0.8.0</div>
             </li>
         `;
 
