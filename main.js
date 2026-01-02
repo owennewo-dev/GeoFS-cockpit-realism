@@ -236,7 +236,7 @@
         const syncButton = document.createElement('button');
         syncButton.className = 'mdl-button mdl-js-button mdl-button--icon geofs-flightplanAction';
         syncButton.id = 'geofs-flightplan-sync-btn';
-        syncButton.title = 'Send Flight Plan to Map';
+        syncButton.title = 'Sync Flight Plan to Navigation Device';
         syncButton.onclick = () => {
             console.log('[GeoFS Cockpit Realism] Flight plan sync requested from map UI');
             if(window.geofsAddonRefreshWaypoints && typeof window.geofsAddonRefreshWaypoints === 'function'){
@@ -261,6 +261,109 @@
         flightPlanWaypoint.appendChild(syncButton);
 
         console.log('[GeoFS Cockpit Realism] Flight plan sync button added');
+    }
+
+    function addRecenterMapButton(){
+        // Check if button already exists
+        if(document.getElementById('geofs-recenter-map-btn')){
+            console.log('[GeoFS Cockpit Realism] Recenter map button already exists');
+            return;
+        }
+
+        // Find the flight plan waypoint controls container
+        const flightPlanWaypoint = document.getElementById('flightPlanWaypoint');
+        if(!flightPlanWaypoint){
+            console.warn('[GeoFS Cockpit Realism] Flight plan waypoint container not found');
+            return;
+        }
+
+        // Create the recenter button
+        const recenterButton = document.createElement('button');
+        recenterButton.className = 'mdl-button mdl-js-button mdl-button--icon geofs-flightplanAction';
+        recenterButton.id = 'geofs-recenter-map-btn';
+        recenterButton.title = 'Recenter Map on Aircraft';
+        recenterButton.onclick = () => {
+            console.log('[GeoFS Cockpit Realism] Recenter map requested');
+            if(window.geofsB55Addon && window.geofsB55Addon.recenterOnAircraft){
+                try{
+                    window.geofsB55Addon.recenterOnAircraft();
+                }catch(e){
+                    console.error('[GeoFS Cockpit Realism] Recenter error:', e);
+                    alert('Failed to recenter map. Check console for details.');
+                }
+            }else{
+                alert('No map loaded. Switch to a supported aircraft first.');
+            }
+        };
+
+        // Create the icon
+        const icon = document.createElement('i');
+        icon.className = 'material-icons';
+        icon.textContent = 'navigation';
+        recenterButton.appendChild(icon);
+
+        // Append the button at the end of the container
+        flightPlanWaypoint.appendChild(recenterButton);
+
+        console.log('[GeoFS Cockpit Realism] Recenter map button added');
+    }
+
+    function addToggleLeafletMapButton(){
+        // Check if button already exists
+        if(document.getElementById('geofs-toggle-leaflet-btn')){
+            console.log('[GeoFS Cockpit Realism] Toggle leaflet button already exists');
+            return;
+        }
+
+        // Find the flight plan waypoint controls container
+        const flightPlanWaypoint = document.getElementById('flightPlanWaypoint');
+        if(!flightPlanWaypoint){
+            console.warn('[GeoFS Cockpit Realism] Flight plan waypoint container not found');
+            return;
+        }
+
+        // Track leaflet map state (true = visible, false = hidden)
+        let leafletMapVisible = true;
+
+        // Create the toggle button
+        const toggleButton = document.createElement('button');
+        toggleButton.className = 'mdl-button mdl-js-button mdl-button--icon geofs-flightplanAction';
+        toggleButton.id = 'geofs-toggle-leaflet-btn';
+        toggleButton.title = 'Hide Native Map';
+
+        // Create the icon
+        const icon = document.createElement('i');
+        icon.className = 'material-icons';
+        icon.textContent = 'visibility_off';
+        toggleButton.appendChild(icon);
+
+        toggleButton.onclick = () => {
+            console.log('[GeoFS Cockpit Realism] Toggle leaflet map requested');
+            const leafletMap = document.querySelector('.geofs-map-viewport');
+            if(!leafletMap){
+                console.warn('[GeoFS Cockpit Realism] Leaflet map not found');
+                alert('Native map element not found.');
+                return;
+            }
+
+            leafletMapVisible = !leafletMapVisible;
+            if(leafletMapVisible){
+                leafletMap.style.display = '';
+                icon.textContent = 'visibility_off';
+                toggleButton.title = 'Hide Native Map';
+                console.log('[GeoFS Cockpit Realism] Leaflet map shown');
+            }else{
+                leafletMap.style.display = 'none';
+                icon.textContent = 'visibility';
+                toggleButton.title = 'Show Native Map';
+                console.log('[GeoFS Cockpit Realism] Leaflet map hidden');
+            }
+        };
+
+        // Append the button at the end of the container
+        flightPlanWaypoint.appendChild(toggleButton);
+
+        console.log('[GeoFS Cockpit Realism] Toggle leaflet button added');
     }
 
     function addMapSearchButtonsToWaypoints(){
@@ -477,6 +580,8 @@
                     console.log('[GeoFS Cockpit Realism] Creating settings UI...');
                     createSettingsUI();
                     addFlightPlanSyncButton();
+                    addRecenterMapButton();
+                    addToggleLeafletMapButton();
                     addMapSearchButtonsToWaypoints();
                     promptForAPIKeyIfNeeded();
                     loadMapLibre((err) => {

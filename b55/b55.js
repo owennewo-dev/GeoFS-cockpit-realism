@@ -419,6 +419,12 @@ function safeInit() {
         // Expose center map on location to main addon UI
         window.geofsB55Addon.centerMapOnLocation = centerMapOnLocation;
         
+        // Expose recenter on aircraft function
+        window.geofsB55Addon.recenterOnAircraft = function() {
+            mapFollowAircraft = true;
+            console.log('[B55] Recentering map on aircraft, map follow enabled');
+        };
+        
         // Expose toggle map follow function
         window.geofsB55Addon.toggleMapFollow = function() {
             mapFollowAircraft = !mapFollowAircraft;
