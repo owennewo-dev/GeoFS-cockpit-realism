@@ -80,6 +80,9 @@
                     <button id="geofs-addon-toggle-terrain-btn" class="mdl-button mdl-js-button mdl-button--raised" style="flex: 1; background: #f44336; color: white;">DISABLE TERRAIN</button>
                     <button id="geofs-addon-toggle-satellite-btn" class="mdl-button mdl-js-button mdl-button--raised" style="flex: 1; background: #4CAF50; color: white;">ENABLE SATELLITE IMAGERY</button>
                 </div>
+                <div style="display:flex; gap:8px; margin-top: 8px;">
+                    <button id="geofs-addon-toggle-keyboard-btn" class="mdl-button mdl-js-button mdl-button--raised" style="flex: 1; background: #2196F3; color: white;">ENABLE KEYBOARD ARROWS</button>
+                </div>
             </li>
             <li style="padding: 15px;">
                 <div style="margin-bottom: 15px;">
@@ -109,7 +112,7 @@
                 </div>
             </li>
             <li style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <div style="font-size: 12px; opacity: 0.5; text-align: center;">GeoFS Cockpit Realism v0.8.0</div>
+                <div style="font-size: 12px; opacity: 0.5; text-align: center;">GeoFS Cockpit Realism v0.9.0</div>
             </li>
         `;
 
@@ -230,6 +233,26 @@
                         }
                     }else{
                         alert('No map loaded for satellite imagery toggle. Switch to a supported aircraft first.');
+                    }
+                };
+            }
+
+            const toggleKeyboardBtn = document.getElementById('geofs-addon-toggle-keyboard-btn');
+            if(toggleKeyboardBtn){
+                toggleKeyboardBtn.onclick = () => {
+                    console.log('[GeoFS Cockpit Realism] Keyboard arrows toggle requested from UI');
+                    if(window.geofsAddonToggleKeyboardArrows && typeof window.geofsAddonToggleKeyboardArrows === 'function'){
+                        try{
+                            const isEnabled = window.geofsAddonToggleKeyboardArrows();
+                            toggleKeyboardBtn.textContent = isEnabled ? 'DISABLE KEYBOARD ARROWS' : 'ENABLE KEYBOARD ARROWS';
+                            const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
+                            if(panelElement) panelElement.style.display = 'none';
+                        }catch(e){
+                            console.error('[GeoFS Cockpit Realism] Keyboard arrows toggle error:', e);
+                            alert('Keyboard arrows toggle failed. Check console for details.');
+                        }
+                    }else{
+                        alert('No map loaded for keyboard arrows toggle. Switch to a supported aircraft first.');
                     }
                 };
             }
