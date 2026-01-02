@@ -9,6 +9,14 @@ Aircraft to be supported in the near future:
 - de Havilland DHC6 Twin Otter
 - Airbus A350
 
+## Features
+
+- Dynamic terrain (hillshade)
+- Heading: Up and North: Up map orientation modes
+- Overlay flight plan
+- Zoom in and out with keyboard
+- Complete worldwde aeronautical information overlay including airports and airspaces with OpenAIP
+
 ## Installation
 
 ### Manual (Browser Console)
