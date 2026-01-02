@@ -425,17 +425,27 @@ function safeInit() {
                     const next = current === 'none' ? 'visible' : 'none';
                     
                     if(next === 'visible'){
-                        // Enabling satellite: save current terrain state and disable terrain
+                        // Enabling satellite: save current terrain state, disable terrain and OSM
                         if(map.getLayer('hills')){
                             terrainStateBeforeSatellite = map.getLayoutProperty('hills', 'visibility') || 'visible';
                             map.setLayoutProperty('hills', 'visibility', 'none');
                             console.log('[B55] Terrain disabled (was:', terrainStateBeforeSatellite + '), satellite enabled');
                         }
+                        // Hide OSM layer so satellite shows at full opacity
+                        if(map.getLayer('osm')){
+                            map.setLayoutProperty('osm', 'visibility', 'none');
+                            console.log('[B55] OSM layer hidden for satellite view');
+                        }
                     } else {
-                        // Disabling satellite: restore previous terrain state
+                        // Disabling satellite: restore previous terrain state and show OSM
                         if(map.getLayer('hills')){
                             map.setLayoutProperty('hills', 'visibility', terrainStateBeforeSatellite);
                             console.log('[B55] Terrain restored to:', terrainStateBeforeSatellite + ', satellite disabled');
+                        }
+                        // Restore OSM layer
+                        if(map.getLayer('osm')){
+                            map.setLayoutProperty('osm', 'visibility', 'visible');
+                            console.log('[B55] OSM layer restored');
                         }
                     }
                     
