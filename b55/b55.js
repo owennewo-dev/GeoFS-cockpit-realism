@@ -257,6 +257,18 @@ function loadFlightplan(waypointArray) {
     map.jumpTo({ center: waypoints[0] });
 }
 
+// Safety: Hide default GeoFS map controls if they exist
+function hideDefaultMapControls() {
+    const centerMap = document.getElementById("centerMap");
+    const drawFlightPath = document.getElementById("drawFlightPath");
+    
+    if (centerMap && centerMap.parentElement) {
+        centerMap.parentElement.style.display = "none";
+    }
+    if (drawFlightPath && drawFlightPath.parentElement) {
+        drawFlightPath.parentElement.style.display = "none";
+    }
+}
 
 // Defer execution until DOM is ready
 if (document.readyState === 'loading') {
