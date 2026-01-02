@@ -264,6 +264,19 @@
     }
 
     function addMapSearchButtonsToWaypoints(){
+        // Add CSS to adjust waypoint element widths to prevent button wrapping
+        if(!document.getElementById('geofs-waypoint-compact-style')){
+            const style = document.createElement('style');
+            style.id = 'geofs-waypoint-compact-style';
+            style.textContent = `
+                .geofs-flightPlanWaypoint .geofs-waypointProperty,
+                .geofs-flightplanheader .geofs-waypointProperty {
+                    width: 60px !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
         // Function to add map search button to a single waypoint
         function addButtonToWaypoint(waypoint){
             // Check if button already exists
@@ -325,7 +338,7 @@
             // Create the icon
             const icon = document.createElement('i');
             icon.className = 'material-icons';
-            icon.textContent = 'map_search';
+            icon.textContent = 'map';
             mapSearchBtn.appendChild(icon);
 
             // Insert after the delete button

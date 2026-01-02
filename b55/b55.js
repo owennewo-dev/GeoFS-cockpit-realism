@@ -185,9 +185,10 @@ function centerMapOnLocation(lat, lon) {
     }
     console.log(`[B55] Centering map on: ${lat}, ${lon}`);
     mapFollowAircraft = false; // Disable auto-centering on aircraft
+    const currentZoom = map.getZoom(); // Preserve current zoom level
     map.jumpTo({
         center: [lon, lat],
-        zoom: 10
+        zoom: currentZoom
     });
 }
 
