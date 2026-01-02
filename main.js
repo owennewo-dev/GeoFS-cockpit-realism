@@ -244,7 +244,7 @@
                     if(window.geofsAddonToggleKeyboardArrows && typeof window.geofsAddonToggleKeyboardArrows === 'function'){
                         try{
                             const isEnabled = window.geofsAddonToggleKeyboardArrows();
-                            toggleKeyboardBtn.textContent = isEnabled ? 'DISABLE KEYBOARD ARROWS' : 'ENABLE KEYBOARD ARROWS';
+                            toggleKeyboardBtn.textContent = isEnabled ? 'RECENTER MAP' : 'ENABLE KEYBOARD ARROWS';
                             const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
                             if(panelElement) panelElement.style.display = 'none';
                         }catch(e){

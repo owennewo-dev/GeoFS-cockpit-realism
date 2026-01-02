@@ -229,20 +229,32 @@ function enableKeyboardArrows() {
         const center = map.getCenter();
         const panDistance = 0.05; // degrees to pan per keypress
         
+        // Get current map bearing (rotation) to move relative to viewing orientation
+        const bearing = map.getBearing();
+        const bearingRad = bearing * Math.PI / 180;
+        
+        // Define movement in screen space (up/down/left/right)
+        let dx = 0, dy = 0;
         switch(e.key) {
             case 'ArrowUp':
-                map.panTo([center.lng, center.lat + panDistance]);
+                dy = panDistance; // Move "up" on screen
                 break;
             case 'ArrowDown':
-                map.panTo([center.lng, center.lat - panDistance]);
+                dy = -panDistance; // Move "down" on screen
                 break;
             case 'ArrowLeft':
-                map.panTo([center.lng - panDistance, center.lat]);
+                dx = -panDistance; // Move "left" on screen
                 break;
             case 'ArrowRight':
-                map.panTo([center.lng + panDistance, center.lat]);
+                dx = panDistance; // Move "right" on screen
                 break;
         }
+        
+        // Rotate the movement by the map's bearing to get lat/lon changes
+        const dLat = dy * Math.cos(bearingRad) - dx * Math.sin(bearingRad);
+        const dLng = dy * Math.sin(bearingRad) + dx * Math.cos(bearingRad);
+        
+        map.panTo([center.lng + dLng, center.lat + dLat]);
     };
     
     document.addEventListener('keydown', keyboardHandler, true);
@@ -262,7 +274,10 @@ function disableKeyboardArrows() {
     }
     
     keyboardArrowsEnabled = false;
-    console.log('[B55] Keyboard arrow controls disabled');
+    
+    // Re-enable auto-centering on aircraft when keyboard controls are disabled
+    mapFollowAircraft = true;
+    console.log('[B55] Keyboard arrow controls disabled, map recentered on aircraft');
 }
 
 function destroy() {
