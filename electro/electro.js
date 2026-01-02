@@ -1,6 +1,9 @@
 let map;
 let mapCallback;
 
+// Airplane icon as SVG data URL (black fill)
+const airplaneIconSvg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black" viewBox="0 0 16 16"><path d="M6.428 1.151C6.708.591 7.213 0 8 0s1.292.592 1.572 1.151C9.861 1.73 10 2.431 10 3v3.691l5.17 2.585a1.5 1.5 0 0 1 .83 1.342V12a.5.5 0 0 1-.582.493l-5.507-.918-.375 2.253 1.318 1.318A.5.5 0 0 1 10.5 16h-5a.5.5 0 0 1-.354-.854l1.319-1.318-.376-2.253-5.507.918A.5.5 0 0 1 0 12v-1.382a1.5 1.5 0 0 1 .83-1.342L6 6.691V3c0-.568.14-1.271.428-1.849"/></svg>');
+
 function initMap() {
     appendNewChild(document.head, 'link', { rel: 'stylesheet', href: 'https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.css' });
     appendNewChild(document.head, 'script', { src: 'https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.js' });
@@ -42,6 +45,44 @@ function initMap() {
         zoom: 10,
         maxPitch: 90
     });
+
+    // Add airplane icon when map style loads
+    map.on('load', function() {
+        const img = new Image();
+        img.onload = function() {
+            if (!map.hasImage('airplane-icon')) {
+                map.addImage('airplane-icon', img);
+            }
+            
+            if (!map.getSource('aircraft-position')) {
+                map.addSource('aircraft-position', {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'Feature',
+                        'geometry': { 'type': 'Point', 'coordinates': [-74.5, 40] },
+                        'properties': { 'bearing': 0 }
+                    }
+                });
+            }
+            
+            if (!map.getLayer('aircraft-layer')) {
+                map.addLayer({
+                    'id': 'aircraft-layer',
+                    'type': 'symbol',
+                    'source': 'aircraft-position',
+                    'layout': {
+                        'icon-image': 'airplane-icon',
+                        'icon-size': 1.0,
+                        'icon-rotate': ['get', 'bearing'],
+                        'icon-rotation-alignment': 'map',
+                        'icon-allow-overlap': true,
+                        'icon-ignore-placement': true
+                    }
+                });
+            }
+        };
+        img.src = airplaneIconSvg;
+    });
 }
 
 function loadMapLibre(callback) {
@@ -77,11 +118,26 @@ function trackZoomKeys() {
 }
 
 function showMap() {
+    const lon = geofs.aircraft.instance.llaLocation[1];
+    const lat = geofs.aircraft.instance.llaLocation[0];
+    const heading = geofs.animation.values.heading360;
+    
     map.jumpTo({
-        center: [geofs.aircraft.instance.llaLocation[1], geofs.aircraft.instance.llaLocation[0]],
-        bearing: geofs.animation.values.heading360
-    })
-    geofs.aircraft.instance.parts["map"].object3d.model.setTextureFromCanvas(map.painter.context.gl, 0)
+        center: [lon, lat],
+        bearing: heading
+    });
+    
+    // Update airplane icon position (rotation = 0 since map rotates with heading)
+    const aircraftSource = map.getSource('aircraft-position');
+    if (aircraftSource) {
+        aircraftSource.setData({
+            'type': 'Feature',
+            'geometry': { 'type': 'Point', 'coordinates': [lon, lat] },
+            'properties': { 'bearing': 0 }
+        });
+    }
+    
+    geofs.aircraft.instance.parts["map"].object3d.model.setTextureFromCanvas(map.painter.context.gl, 0);
 }
 
 function destroy() {
