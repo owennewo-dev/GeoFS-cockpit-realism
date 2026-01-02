@@ -12,9 +12,10 @@ Aircraft to be supported in the near future:
 ## Features
 
 - Dynamic terrain (hillshade)
-- Heading: Up and North: Up map orientation modes
-- Overlay flight plan
-- Zoom in and out with keyboard
+- Satellite imagery
+- Two orientation modes
+- Flight plan integration
+- Keyboard controls
 - Complete worldwde aeronautical information overlay including airports and airspaces with OpenAIP
 
 ## Installation
@@ -24,9 +25,3 @@ Aircraft to be supported in the near future:
 2. The addon will automatically load when you're in a supported aircraft
 
 ### Tampermonkey (Coming Soon)
-
-## Configuration
-
-Click the `COCKPIT` button in the lower left menu to open the addon configuration panel.
-
-From here you can follow the instructions to add an OpenAIP API key. At the top of the menu there are two buttons, the `MAP: NORTH UP` button will change the orientation of the map to be north up, pressing the button again will toggle back to orienting the map to the current heading of the aircraft. Please note that the orientation of the airplane icon will not change when toggleing to north up mode. There is also a `TOGGLE MAP TERRAIN` button that turns the hillshade terrain overlay on or off. At the bottom of the menu is the version.
