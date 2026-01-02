@@ -77,7 +77,8 @@
             <li style="padding: 10px 15px; text-align: center;">
                 <div style="display:flex; gap:8px;">
                     <button id="geofs-addon-map-heading-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" style="flex: 1;">MAP: NORTH UP</button>
-                    <button id="geofs-addon-toggle-terrain-btn" class="mdl-button mdl-js-button mdl-button--raised" style="flex: 1; background: #f44336; color: white;">TOGGLE MAP TERRAIN</button>
+                    <button id="geofs-addon-toggle-terrain-btn" class="mdl-button mdl-js-button mdl-button--raised" style="flex: 1; background: #f44336; color: white;">DISABLE TERRAIN</button>
+                    <button id="geofs-addon-toggle-satellite-btn" class="mdl-button mdl-js-button mdl-button--raised" style="flex: 1; background: #4CAF50; color: white;">ENABLE SATELLITE IMAGERY</button>
                 </div>
             </li>
             <li style="padding: 15px;">
@@ -195,7 +196,10 @@
                     console.log('[GeoFS Cockpit Realism] Terrain toggle requested from UI');
                     if(window.geofsAddonToggleTerrain && typeof window.geofsAddonToggleTerrain === 'function'){
                         try{
-                            window.geofsAddonToggleTerrain();
+                            const newState = window.geofsAddonToggleTerrain();
+                            if(newState !== null){
+                                toggleTerrainBtn.textContent = newState === 'visible' ? 'DISABLE TERRAIN' : 'ENABLE TERRAIN';
+                            }
                             const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
                             if(panelElement) panelElement.style.display = 'none';
                         }catch(e){
@@ -204,6 +208,28 @@
                         }
                     }else{
                         alert('No map loaded for terrain toggle. Switch to a supported aircraft first.');
+                    }
+                };
+            }
+
+            const toggleSatelliteBtn = document.getElementById('geofs-addon-toggle-satellite-btn');
+            if(toggleSatelliteBtn){
+                toggleSatelliteBtn.onclick = () => {
+                    console.log('[GeoFS Cockpit Realism] Satellite imagery toggle requested from UI');
+                    if(window.geofsAddonToggleSatelliteImagery && typeof window.geofsAddonToggleSatelliteImagery === 'function'){
+                        try{
+                            const newState = window.geofsAddonToggleSatelliteImagery();
+                            if(newState !== null){
+                                toggleSatelliteBtn.textContent = newState === 'visible' ? 'DISABLE SATELLITE IMAGERY' : 'ENABLE SATELLITE IMAGERY';
+                            }
+                            const panelElement = document.querySelector('.geofs-cockpit-addon-panel');
+                            if(panelElement) panelElement.style.display = 'none';
+                        }catch(e){
+                            console.error('[GeoFS Cockpit Realism] Satellite imagery toggle error:', e);
+                            alert('Satellite imagery toggle failed. Check console for details.');
+                        }
+                    }else{
+                        alert('No map loaded for satellite imagery toggle. Switch to a supported aircraft first.');
                     }
                 };
             }
@@ -226,10 +252,10 @@
             return;
         }
 
-        // Reduce the width of the text field to make room for the new button
+        // Reduce the width of the text field to make room for the new buttons
         const textFieldContainer = flightPlanWaypoint.querySelector('.mdl-textfield');
         if(textFieldContainer){
-            textFieldContainer.style.width = '250px';
+            textFieldContainer.style.width = '200px';
         }
 
         // Create the sync button
@@ -337,6 +363,12 @@
         icon.textContent = 'visibility_off';
         toggleButton.appendChild(icon);
 
+        // Create an MDL tooltip element bound to this button
+        const tooltip = document.createElement('div');
+        tooltip.className = 'mdl-tooltip';
+        tooltip.setAttribute('for', toggleButton.id);
+        tooltip.textContent = 'Hide Native Map';
+
         toggleButton.onclick = () => {
             console.log('[GeoFS Cockpit Realism] Toggle leaflet map requested');
             const leafletMap = document.querySelector('.geofs-map-viewport');
@@ -351,17 +383,20 @@
                 leafletMap.style.display = '';
                 icon.textContent = 'visibility_off';
                 toggleButton.title = 'Hide Native Map';
+                tooltip.textContent = 'Hide Native Map';
                 console.log('[GeoFS Cockpit Realism] Leaflet map shown');
             }else{
                 leafletMap.style.display = 'none';
                 icon.textContent = 'visibility';
                 toggleButton.title = 'Show Native Map';
+                tooltip.textContent = 'Show Native Map';
                 console.log('[GeoFS Cockpit Realism] Leaflet map hidden');
             }
         };
 
-        // Append the button at the end of the container
+        // Append the button and tooltip at the end of the container
         flightPlanWaypoint.appendChild(toggleButton);
+        flightPlanWaypoint.appendChild(tooltip);
 
         console.log('[GeoFS Cockpit Realism] Toggle leaflet button added');
     }
